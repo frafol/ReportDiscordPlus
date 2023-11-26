@@ -1,0 +1,30 @@
+name: ReportDiscordPlus
+version: '4.2'
+main: me.francies.ReportDiscordPlus.ReportDiscordPlus
+author: Francies
+api-version: '1.13'
+
+listeners:
+  - me.francies.OnlineStaff.OnlineStaffChecker
+
+permissions:
+  report.use:
+    description: Allows you to use the /report command
+    default: op
+  report.bypasstime:
+    description: Allows you to send reports without cooldown
+    default: op
+  report.mcreport:
+    description: Allows you to see new report alerts without checking Discord
+    default: op
+  report.tp:
+    description: Allows you to instantly teleport to the reported player
+    default: op
+  report.protection:
+    description: Allows to not be reported
+
+commands:
+  report:
+  description: Report a player with a specific reason
+  usage: /report <player> <reason>
+  permission: report.use

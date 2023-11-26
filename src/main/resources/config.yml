@@ -1,0 +1,50 @@
+# ReportDiscordPlus Plugin Configuration
+#
+# By Francies
+#
+# These settings are very important for the plugin to work
+
+discord:
+  token: "YOUR_BOT_TOKEN"
+  channelId: "YOUR_DISCORD_CHANNEL_ID"
+  pingRoleID: "YOUR_DISCORD_PING_ROLE_ID"
+  allert: ":warning: New report available! :warning:"
+  title: ":hammer_pick: ReportDiscordPlus :hammer_pick:"
+  reaction: "\uD83D\uDC4D"
+
+# Report cooldown time in seconds
+cooldown: 60  # If left empty, the default value will be 60 seconds
+
+# put your server type here
+server: ""
+
+# Messages
+messages:
+  playerNotFound: "&6&lReport&7&lDSPL &cPlayer not found."
+  onlineplayer: "&6&lReport&7&lDSPL &cThis player is not online"
+  cannotReportPlayer: "&6&lReport&7&lDSPL &cYou cannot report this player."
+  missingReason: "&6&lReport&7&lDSPL &cYou must specify a reason for the report."
+  cooldownMessage: "&6&lReport&7&lDSPL &cYou have to wait &9{timeRemaining} &cseconds before you can send a new report."
+  reportSent: "&6&lReport&7&lDSPL &aYour report has been sent successfully!"
+  noPermission: "&6&lReport&7&lDSPL &cYou do not have permission to run this command."
+  consoleCommand: "&6&lReport&7&lDSPL &cThis command can only be performed by a player."
+  staffAlert: "&6&lReport&7&lDSPL &6&lNew report available!&r &6Player: &9{player} &6- Reported Player: &9{reportedPlayer} &6- Reason: &9{reason} &6- Server: &9{server}"
+  myself: "&6&lReport&7&lDSPL &cYou cannot report yourself!"
+
+title: "&6&lNEW REPORT"
+subtitle: "&9READ BELOW"
+
+
+servers:
+  server1:
+    servername: "YOUR SERVER NAME"
+    channel_id: "YOUR_CHANNEL_ID"
+    message_template: "Now,there are %online_staff% staffer online on YOUR SERVER NAME"
+    leave_message_template: "One staffer has left the server, staff remaining %online_staff%"
+
+# Permissions:
+# report.use            - Enables the use of the report command
+# report.bypasscooldown - Grants immunity to the cooldown
+# report.mcreport       - Permit to view a staff alert message when a new report is made
+# report.protection     - Grant immunity to be reported
+# report.tp             - Allows you to instantly teleport to the reported player
