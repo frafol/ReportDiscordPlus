@@ -21,7 +21,7 @@ public class JDAEventListener implements EventListener {
                     String reportedPlayer = slashEvent.getOption("nome_giocatore").getAsString();
                     String reason = slashEvent.getOption("motivo").getAsString();
 
-                    // Invia il report al canale Discord
+
                     plugin.sendReportToDiscord(reporter, reportedPlayer, reason, "Survival");
                 }
             }

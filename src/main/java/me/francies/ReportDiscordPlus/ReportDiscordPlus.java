@@ -36,7 +36,6 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
 
-
 public class ReportDiscordPlus extends Plugin {
     private Configuration config;
 
@@ -69,6 +68,9 @@ public class ReportDiscordPlus extends Plugin {
 
          titleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("title"));
          subTitleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("subtitle"));
+
+
+
 
     }
 
@@ -150,13 +152,8 @@ public class ReportDiscordPlus extends Plugin {
         return this.messages.getOrDefault(key, "");
     }
 
-    public boolean isPlayerInBlacklist(String playerName) {
-
-        for (String blacklistedPlayer : this.blacklist) {
-            if (blacklistedPlayer.equalsIgnoreCase(playerName))
-                return true;
-        }
-        return false;
+    public boolean isPlayerInBlacklist(ProxiedPlayer playerName) {
+        return playerName.hasPermission("report.protection");
     }
 
     public void setCooldown(ProxiedPlayer player) {
@@ -166,7 +163,7 @@ public class ReportDiscordPlus extends Plugin {
     }
 
     public boolean hasCooldown(ProxiedPlayer player) {
-        return (this.cooldowns.containsKey(player.getName()) && (Long) this.cooldowns.get(player.getName()) > System.currentTimeMillis());
+        return (this.cooldowns.containsKey(player.getName()) && this.cooldowns.get(player.getName()) > System.currentTimeMillis());
     }
 
     public HashMap<String, Long> getCooldowns() {
@@ -201,12 +198,12 @@ public class ReportDiscordPlus extends Plugin {
                     }
                     String reason = "";
                     if (args.length > 1) {
-                        reason = String.join(" ", Arrays.<CharSequence>copyOfRange((CharSequence[])args, 1, args.length));
+                        reason = String.join(" ", Arrays.<CharSequence>copyOfRange(args, 1, args.length));
                     } else {
                         player.sendMessage(ReportDiscordPlus.this.getMessage("missingReason"));
                         return;
                     }
-                    if (ReportDiscordPlus.this.isPlayerInBlacklist(reportedPlayer.getName())) {
+                    if (ReportDiscordPlus.this.isPlayerInBlacklist(reportedPlayer)) {
                         player.sendMessage(ReportDiscordPlus.this.getMessage("cannotReportPlayer"));
                         return;
                     }
@@ -235,11 +232,11 @@ public class ReportDiscordPlus extends Plugin {
 
     private void sendReportToMinecraftStaff(ProxiedPlayer reporter, String reportedPlayer, String reason, String server) {
         String teleportCommand = "/tp " + reportedPlayer;
-        String sendstaff = "/" + server;
+        String sendstaff = "/" + config.getString("tp-to-server-command");
         TextComponent sendButton = new TextComponent(ChatColor.translateAlternateColorCodes('&', " &eSERVER"));
         TextComponent teleportButton = new TextComponent(ChatColor.translateAlternateColorCodes('&', " &eTELEPORT"));
-        teleportButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (BaseComponent[])new TextComponent[] { new TextComponent("Vai dal giocatore segnalato") }));
-        sendButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (BaseComponent[])new TextComponent[] { new TextComponent("Vai nel server del giocatore segnalato") }));
+        teleportButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent[] { new TextComponent("Vai dal giocatore segnalato") }));
+        sendButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent[] { new TextComponent("Vai nel server del giocatore segnalato") }));
         teleportButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, teleportCommand));
         sendButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, sendstaff));
         String staffMessage = getMessage("staffAlert").replace("{player}", reporter.getName()).replace("{reportedPlayer}", reportedPlayer).replace("{reason}", reason).replace("{server}", server).replace("{teleportButton}", "Vai dal giocatore segnalato");
@@ -248,12 +245,12 @@ public class ReportDiscordPlus extends Plugin {
             if (staffMember.hasPermission("report.mcreport")) {
                 TextComponent messageComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', staffMessage));
                 if (staffMember.hasPermission("report.tp")) {
-                    messageComponent.addExtra((BaseComponent)teleportButton);
-                    messageComponent.addExtra((BaseComponent)sendButton);
+                    messageComponent.addExtra(teleportButton);
+                    messageComponent.addExtra(sendButton);
                     sendTitleToPlayer(staffMember,  createTitle(titleText, subTitleText, 10, 70, 20 ));
 
                 }
-                staffMember.sendMessage((BaseComponent)messageComponent);
+                staffMember.sendMessage(messageComponent);
             }
         }
     }
@@ -290,15 +287,13 @@ public class ReportDiscordPlus extends Plugin {
     public Title createTitle(String titleText, String subTitleText, int fadeIn, int stay, int fadeOut) {
         Title title = ProxyServer.getInstance().createTitle();
 
-        // Imposta il titolo
+
         BaseComponent titleComponent = new TextComponent(titleText);
         title.title(titleComponent);
 
-        // Imposta il sottotitolo
         BaseComponent subTitleComponent = new TextComponent(subTitleText);
         title.subTitle(subTitleComponent);
 
-        // Imposta i tempi di animazione
         title.fadeIn(fadeIn);
         title.stay(stay);
         title.fadeOut(fadeOut);
@@ -306,7 +301,7 @@ public class ReportDiscordPlus extends Plugin {
         return title;
     }
     public void sendTitleToPlayer(ProxiedPlayer player, Title title) {
-        // Invia il titolo al giocatore
+
         title.send(player);
     }
 

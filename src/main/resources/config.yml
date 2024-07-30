@@ -15,8 +15,6 @@ discord:
 # Report cooldown time in seconds
 cooldown: 60  # If left empty, the default value will be 60 seconds
 
-# put your server type here
-server: ""
 
 # Messages
 messages:
@@ -33,14 +31,8 @@ messages:
 
 title: "&6&lNEW REPORT"
 subtitle: "&9READ BELOW"
+tp-to-server-command: "" # Insert the command that you use to change server in your network
 
-
-servers:
-  server1:
-    servername: "YOUR SERVER NAME"
-    channel_id: "YOUR_CHANNEL_ID"
-    message_template: "Now,there are %online_staff% staffer online on YOUR SERVER NAME"
-    leave_message_template: "One staffer has left the server, staff remaining %online_staff%"
 
 # Permissions:
 # report.use            - Enables the use of the report command
