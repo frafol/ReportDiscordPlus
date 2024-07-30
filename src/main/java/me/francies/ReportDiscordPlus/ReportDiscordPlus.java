@@ -232,7 +232,7 @@ public class ReportDiscordPlus extends Plugin {
 
     private void sendReportToMinecraftStaff(ProxiedPlayer reporter, String reportedPlayer, String reason, String server) {
         String teleportCommand = "/tp " + reportedPlayer;
-        String sendstaff = "/ " + server;
+        String sendstaff = "/" + server;
         TextComponent sendButton = new TextComponent(ChatColor.translateAlternateColorCodes('&', " &eSERVER"));
         TextComponent teleportButton = new TextComponent(ChatColor.translateAlternateColorCodes('&', " &eTELEPORT"));
         teleportButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent[] { new TextComponent("Vai dal giocatore segnalato") }));
