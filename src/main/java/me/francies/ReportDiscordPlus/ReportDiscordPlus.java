@@ -1,56 +1,31 @@
 package me.francies.ReportDiscordPlus;
 
-import java.awt.Color;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
+import java.io.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.entities.emoji.UnicodeEmoji;
-
+import me.francies.ReportDiscordPlus.commands.ReportCommand;
+import me.francies.ReportDiscordPlus.utility.DiscordNotifier;
+import me.francies.ReportDiscordPlus.utility.StaffNotifier;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
-
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.Title;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
-
 public class ReportDiscordPlus extends Plugin {
+
     private Configuration config;
-
     private Map<String, String> messages;
-
     public HashMap<String, Long> cooldowns = new HashMap<>();
-
     public String pingRoleID;
-
-    public List<String> blacklist;
-
-    public JDAManager jdaManager;
-    String titleText ;
+    String titleText;
     String subTitleText;
-    private DiscordBot discordBot;
+
+    private DiscordNotifier discordNotifier;
+    private StaffNotifier staffNotifier;
 
     public void onEnable() {
         try {
@@ -58,24 +33,18 @@ public class ReportDiscordPlus extends Plugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        titleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("title"));
+        subTitleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("subtitle"));
 
-        discordBot = DiscordBot.getInstance(config.getString("discord.token"));
-        discordBot.startBot();
-        getProxy().getPluginManager().registerCommand(this, new ReportCommand());
-        this.jdaManager = new JDAManager(this);
-        this.jdaManager.setupJDA();
-        getLogger().info("The ReportDiscordPlus plugin has been enabled!");
+        this.discordNotifier = new DiscordNotifier(config, getLogger(), messages);
+        this.staffNotifier = new StaffNotifier(titleText, subTitleText, messages);
 
-         titleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("title"));
-         subTitleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("subtitle"));
-
-
-
-
+        getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
+        getLogger().info("REPORT ATTIVI");
     }
 
     public void onDisable() {
-        getLogger().info("The ReportDiscordPlus plugin has been disabled!");
+        getLogger().info("SPEGNIMENTO REPORT");
     }
 
     private void loadConfig() throws IOException {
@@ -89,28 +58,15 @@ public class ReportDiscordPlus extends Plugin {
                     Scanner scanner = new Scanner(inputStream);
                     try {
                         OutputStream outputStream = new FileOutputStream(configFile);
-                        try {
-                            while (scanner.hasNextLine()) {
-                                String line = scanner.nextLine();
-                                outputStream.write(line.getBytes());
-                                outputStream.write(System.lineSeparator().getBytes());
-                            }
-                            outputStream.close();
-                        } catch (Throwable throwable) {
-                            try {
-                                outputStream.close();
-                            } catch (Throwable throwable1) {
-                                throwable.addSuppressed(throwable1);
-                            }
-                            throw throwable;
+                        while (scanner.hasNextLine()) {
+                            String line = scanner.nextLine();
+                            outputStream.write(line.getBytes());
+                            outputStream.write(System.lineSeparator().getBytes());
                         }
+                        outputStream.close();
                         scanner.close();
                     } catch (Throwable throwable) {
-                        try {
-                            scanner.close();
-                        } catch (Throwable throwable1) {
-                            throwable.addSuppressed(throwable1);
-                        }
+                        scanner.close();
                         throw throwable;
                     }
                 }
@@ -118,17 +74,12 @@ public class ReportDiscordPlus extends Plugin {
                     inputStream.close();
             } catch (Throwable throwable) {
                 if (inputStream != null)
-                    try {
-                        inputStream.close();
-                    } catch (Throwable throwable1) {
-                        throwable.addSuppressed(throwable1);
-                    }
+                    inputStream.close();
                 throw throwable;
             }
         }
         this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
         this.pingRoleID = this.config.getString("discord.pingRoleID");
-        this.blacklist = this.config.getStringList("blacklist");
         loadMessages();
     }
 
@@ -136,8 +87,7 @@ public class ReportDiscordPlus extends Plugin {
         this.messages = new HashMap<>();
         if (this.config.getSection("messages") != null) {
             Configuration messagesSection = this.config.getSection("messages");
-            Set<String> keys = (Set<String>)messagesSection.getKeys();
-            for (String key : keys) {
+            for (String key : messagesSection.getKeys()) {
                 String message = messagesSection.getString(key);
                 this.messages.put(key, ChatColor.translateAlternateColorCodes('&', message));
             }
@@ -152,8 +102,8 @@ public class ReportDiscordPlus extends Plugin {
         return this.messages.getOrDefault(key, "");
     }
 
-    public boolean isPlayerInBlacklist(ProxiedPlayer playerName) {
-        return playerName.hasPermission("report.protection");
+    public boolean isPlayerInBlacklist(ProxiedPlayer player) {
+        return player.hasPermission("report.protection");
     }
 
     public void setCooldown(ProxiedPlayer player) {
@@ -170,140 +120,11 @@ public class ReportDiscordPlus extends Plugin {
         return this.cooldowns;
     }
 
-    public class ReportCommand extends Command {
-        public ReportCommand() {
-            super("report");
-        }
-
-        public void execute(CommandSender sender, String[] args) {
-            if (sender instanceof ProxiedPlayer) {
-                ProxiedPlayer player = (ProxiedPlayer)sender;
-                if (player.hasPermission("report.use")) {
-                    if (args.length == 0) {
-                        player.sendMessage(ReportDiscordPlus.this.getMessage("playerNotFound"));
-                        return;
-                    }
-                    String reportedPlayerName = args[0];
-                    ProxiedPlayer reportedPlayer = ReportDiscordPlus.this.getProxy().getPlayer(reportedPlayerName);
-                    if (reportedPlayer == null || !reportedPlayer.isConnected()) {
-                        String NoON = ReportDiscordPlus.this.config.getString("messages.onlineplayer");
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', NoON));
-                        return;
-                    }
-
-                    if (reportedPlayer == sender){
-                        String myself = ReportDiscordPlus.this.config.getString("messages.myself");
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', myself));
-                        return;
-                    }
-                    String reason = "";
-                    if (args.length > 1) {
-                        reason = String.join(" ", Arrays.<CharSequence>copyOfRange(args, 1, args.length));
-                    } else {
-                        player.sendMessage(ReportDiscordPlus.this.getMessage("missingReason"));
-                        return;
-                    }
-                    if (ReportDiscordPlus.this.isPlayerInBlacklist(reportedPlayer)) {
-                        player.sendMessage(ReportDiscordPlus.this.getMessage("cannotReportPlayer"));
-                        return;
-                    }
-                    if (ReportDiscordPlus.this.hasCooldown(player) && !player.hasPermission("report.bypasscooldown")) {
-                        long cooldownTime = ((Long)ReportDiscordPlus.this.getCooldowns().get(player.getName())).longValue();
-                        long currentTime = System.currentTimeMillis();
-                        long timeRemaining = cooldownTime - currentTime;
-                        player.sendMessage(ReportDiscordPlus.this.getMessage("cooldownMessage").replace("{timeRemaining}", String.valueOf(timeRemaining / 1000L)));
-                        return;
-                    }
-                    String reporter = player.getName();
-                    String server = player.getServer().getInfo().getMotd();
-                    ReportDiscordPlus.this.sendReportToDiscord(reporter, reportedPlayer.getName(), reason, server);
-                    ReportDiscordPlus.this.sendReportToMinecraftStaff(player, reportedPlayer.getName(), reason, server);
-                    ReportDiscordPlus.this.setCooldown(player);
-                    String confirmationMessage = ReportDiscordPlus.this.getMessage("reportSent");
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', confirmationMessage));
-                } else {
-                    player.sendMessage(ReportDiscordPlus.this.getMessage("noPermission"));
-                }
-            } else {
-                sender.sendMessage(ReportDiscordPlus.this.getMessage("consoleCommand"));
-            }
-        }
+    public DiscordNotifier getDiscordNotifier() {
+        return discordNotifier;
     }
 
-    private void sendReportToMinecraftStaff(ProxiedPlayer reporter, String reportedPlayer, String reason, String server) {
-        String teleportCommand = "/tp " + reportedPlayer;
-        String sendstaff = "/" + server;
-        TextComponent sendButton = new TextComponent(ChatColor.translateAlternateColorCodes('&', " &eSERVER"));
-        TextComponent teleportButton = new TextComponent(ChatColor.translateAlternateColorCodes('&', " &eTELEPORT"));
-        teleportButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent[] { new TextComponent("Vai dal giocatore segnalato") }));
-        sendButton.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent[] { new TextComponent("Vai nel server del giocatore segnalato") }));
-        teleportButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, teleportCommand));
-        sendButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, sendstaff));
-        String staffMessage = getMessage("staffAlert").replace("{player}", reporter.getName()).replace("{reportedPlayer}", reportedPlayer).replace("{reason}", reason).replace("{server}", server).replace("{teleportButton}", "Vai dal giocatore segnalato");
-
-        for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
-            if (staffMember.hasPermission("report.mcreport")) {
-                TextComponent messageComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', staffMessage));
-                if (staffMember.hasPermission("report.tp")) {
-                    messageComponent.addExtra(teleportButton);
-                    messageComponent.addExtra(sendButton);
-                    sendTitleToPlayer(staffMember,  createTitle(titleText, subTitleText, 10, 70, 20 ));
-
-                }
-                staffMember.sendMessage(messageComponent);
-            }
-        }
+    public StaffNotifier getStaffNotifier() {
+        return staffNotifier;
     }
-
-    public void sendReportToDiscord(String reporter, String reportedPlayer, String reason, String server) {
-        String discordChannelId = this.config.getString("discord.channelId");
-        if (this.jdaManager.getJDA() != null && discordChannelId != null && this.pingRoleID != null) {
-            TextChannel channel = this.jdaManager.getJDA().getTextChannelById(discordChannelId);
-            Role pingRole = channel.getGuild().getRoleById(this.pingRoleID);
-            String allert = this.config.getString("discord.allert");
-            String title = this.config.getString("discord.title");
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle(title)
-                    .setColor(Color.RED)
-                    .addField("Reporter", "🟢 " + reporter, false)
-                    .addField("Reported", "🔴 " + reportedPlayer, false)
-                    .addField("Reason", "💬 " + reason, false)
-                    .addField("Server", "💻 " + server, false);
-
-            String emojiString = this.config.getString("discord.reaction");
-            UnicodeEmoji unicodeEmoji = Emoji.fromUnicode(emojiString);
-            channel.sendMessageEmbeds(embedBuilder.build(), new net.dv8tion.jda.api.entities.MessageEmbed[0]).queue(response -> response.addReaction(unicodeEmoji).queue());
-            if (pingRole != null) {
-                String messageContent = pingRole.getAsMention();
-                channel.sendMessage(messageContent + allert).queue();
-            } else {
-                getLogger().warning("The configured ping role ID is invalid or the bot does not have access to that role.");
-            }
-        } else {
-            getLogger().warning("The config.yml was not set correctly. Check the channel ID, ping role ID, and bot token!");
-        }
-    }
-
-    public Title createTitle(String titleText, String subTitleText, int fadeIn, int stay, int fadeOut) {
-        Title title = ProxyServer.getInstance().createTitle();
-
-
-        BaseComponent titleComponent = new TextComponent(titleText);
-        title.title(titleComponent);
-
-        BaseComponent subTitleComponent = new TextComponent(subTitleText);
-        title.subTitle(subTitleComponent);
-
-        title.fadeIn(fadeIn);
-        title.stay(stay);
-        title.fadeOut(fadeOut);
-
-        return title;
-    }
-    public void sendTitleToPlayer(ProxiedPlayer player, Title title) {
-
-        title.send(player);
-    }
-
-
 }

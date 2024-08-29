@@ -5,8 +5,7 @@
 # These settings are very important for the plugin to work
 
 discord:
-  token: "YOUR_BOT_TOKEN"
-  channelId: "YOUR_DISCORD_CHANNEL_ID"
+  webhookUrl: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
   pingRoleID: "YOUR_DISCORD_PING_ROLE_ID"
   allert: ":warning: New report available! :warning:"
   title: ":hammer_pick: ReportDiscordPlus :hammer_pick:"
