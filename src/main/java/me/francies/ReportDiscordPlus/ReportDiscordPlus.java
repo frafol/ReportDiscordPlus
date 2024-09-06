@@ -1,19 +1,24 @@
 package me.francies.ReportDiscordPlus;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+
 
 import me.francies.ReportDiscordPlus.commands.ReportCommand;
 import me.francies.ReportDiscordPlus.utility.DiscordNotifier;
 import me.francies.ReportDiscordPlus.utility.StaffNotifier;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
+import org.bstats.bungeecord.Metrics;
+import org.bstats.charts.SingleLineChart;
 
 public class ReportDiscordPlus extends Plugin {
 
@@ -28,6 +33,22 @@ public class ReportDiscordPlus extends Plugin {
     private StaffNotifier staffNotifier;
 
     public void onEnable() {
+
+        int pluginId = 23259;
+        Metrics metrics = new Metrics(this, pluginId);
+
+        metrics.addCustomChart(new SingleLineChart("players", () -> ProxyServer.getInstance().getOnlineCount()));
+        getLogger().info("  +----------------------------------------------------------------------------------------------+");
+        getLogger().info("  |   ____                       _   ____  _                       _ ____  _                     |");
+        getLogger().info("  |  |  _ \\ ___ _ __   ___  _ __| |_|  _ \\(_)___  ___ ___  _ __ __| |  _ \\| |_   _ ___           |");
+        getLogger().info("  |  | |_) / _ \\ '_ \\ / _ \\| '__| __| | | | / __|/ __/ _ \\| '__/ _` | |_) | | | | / __|          |");
+        getLogger().info("  |  |  _ <  __/ |_) | (_) | |  | |_| |_| | \\__ \\ (_| (_) | | | (_| |  __/| | |_| \\__ \\          |");
+        getLogger().info("  |  |_| \\_\\___| .__/ \\___/|_|   \\__|____/|_|___/\\___\\___/|_|  \\__,_|_|   |_|\\__,_|___/          |");
+        getLogger().info("  |            |_|                                                                               |");
+        getLogger().info("  |                                                                                              |");
+        getLogger().info("  +----------------------------------------------------------------------------------------------+");
+        getLogger().info("                                    Versione: 5.2");
+
         try {
             loadConfig();
         } catch (IOException e) {
@@ -40,24 +61,30 @@ public class ReportDiscordPlus extends Plugin {
         this.staffNotifier = new StaffNotifier(titleText, subTitleText, messages);
 
         getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
-        getLogger().info("REPORT ATTIVI");
+
     }
 
     public void onDisable() {
-        getLogger().info("SPEGNIMENTO REPORT");
+        getLogger().info("  ______   _______ ");
+        getLogger().info(" | __ ) \\ / / ____|");
+        getLogger().info(" |  _ \\\\ V /|  _|  ");
+        getLogger().info(" | |_) || | | |___ ");
+        getLogger().info(" |____/ |_| |_____|");
+        getLogger().info("                   ");
+        getLogger().info(" Version 5.2");
     }
 
     private void loadConfig() throws IOException {
         if (!getDataFolder().exists())
             getDataFolder().mkdir();
-        File configFile = new File(getDataFolder(), "config.yml");
+        File configFile = new File(getDataFolder(), "src/main/resources/config.yml");
         if (!configFile.exists()) {
-            InputStream inputStream = getResourceAsStream("config.yml");
+            InputStream inputStream = getResourceAsStream("src/main/resources/config.yml");
             try {
                 if (inputStream != null) {
                     Scanner scanner = new Scanner(inputStream);
                     try {
-                        OutputStream outputStream = new FileOutputStream(configFile);
+                        OutputStream outputStream = Files.newOutputStream(configFile.toPath());
                         while (scanner.hasNextLine()) {
                             String line = scanner.nextLine();
                             outputStream.write(line.getBytes());
@@ -73,8 +100,7 @@ public class ReportDiscordPlus extends Plugin {
                 if (inputStream != null)
                     inputStream.close();
             } catch (Throwable throwable) {
-                if (inputStream != null)
-                    inputStream.close();
+                inputStream.close();
                 throw throwable;
             }
         }
@@ -108,7 +134,7 @@ public class ReportDiscordPlus extends Plugin {
 
     public void setCooldown(ProxiedPlayer player) {
         int cooldownSeconds = this.config.getInt("cooldown", 120);
-        long cooldownTime = System.currentTimeMillis() + (cooldownSeconds * 1000);
+        long cooldownTime = System.currentTimeMillis() + (cooldownSeconds * 1000L);
         this.cooldowns.put(player.getName(), cooldownTime);
     }
 

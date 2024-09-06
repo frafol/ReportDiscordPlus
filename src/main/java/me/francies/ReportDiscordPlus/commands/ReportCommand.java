@@ -5,6 +5,8 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
+import java.util.Arrays;
+
 public class ReportCommand extends Command {
 
     private final ReportDiscordPlus plugin;
@@ -36,11 +38,12 @@ public class ReportCommand extends Command {
                 }
                 String reason = "";
                 if (args.length > 1) {
-                    reason = String.join(" ", args);
+                    reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                 } else {
                     player.sendMessage(plugin.getMessage("missingReason"));
                     return;
                 }
+
                 if (plugin.isPlayerInBlacklist(reportedPlayer)) {
                     player.sendMessage(plugin.getMessage("cannotReportPlayer"));
                     return;

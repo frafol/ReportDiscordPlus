@@ -1,5 +1,5 @@
 name: ReportDiscordPlus
-version: '5.0'
+version: '5.2'
 main: me.francies.ReportDiscordPlus.ReportDiscordPlus
 author: Francies
 api-version: '1.13'
