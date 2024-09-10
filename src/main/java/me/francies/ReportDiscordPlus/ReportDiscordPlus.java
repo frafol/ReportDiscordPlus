@@ -39,10 +39,8 @@ public class ReportDiscordPlus extends Plugin {
     private DiscordNotifier discordNotifier;
     private StaffNotifier staffNotifier;
     private final String versionUrl = "https://www.franciesdev.it/api/reportdiscordplus.json";
-    int updateInterval = getConfig().getInt("update-check-interval", 86400);
 
     public void onEnable() {
-        checkForUpdates();
         int pluginId = 23259;
         Metrics metrics = new Metrics(this, pluginId);
 
@@ -162,47 +160,45 @@ public class ReportDiscordPlus extends Plugin {
     public StaffNotifier getStaffNotifier() {
         return staffNotifier;
     }
+
     public void checkForUpdates() {
-        ProxyServer.getInstance().getScheduler().schedule(this, () -> {
+        try {
 
-            try {
+            URL url = new URL(versionUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
 
-                URL url = new URL(versionUrl);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                StringBuilder content = new StringBuilder();
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine);
-                }
-
-                in.close();
-                connection.disconnect();
-
-                JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
-
-                String latestVersion = json.get("version").getAsString();
-                String downloadUrl1 = json.get("downloadUrl1").getAsString();
-                String downloadUrl2 = json.get("downloadUrl2").getAsString();
-
-                String currentVersion = this.getDescription().getVersion();
-
-                if (!currentVersion.equals(latestVersion)) {
-
-                    for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
-                            staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + " &eA newer version is available: &f" + latestVersion)));
-                            staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&3Download link 1: &f" + downloadUrl1)));
-                            staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&bDownload link 2: &f" + downloadUrl2)));
-                    }
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
             }
-        }, 0L, updateInterval, TimeUnit.SECONDS);
-    }
 
+            in.close();
+            connection.disconnect();
+
+            JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
+
+            String latestVersion = json.get("version").getAsString();
+            String downloadUrl1 = json.get("downloadUrl1").getAsString();
+            String downloadUrl2 = json.get("downloadUrl2").getAsString();
+
+            String currentVersion = this.getDescription().getVersion();
+
+            if (!currentVersion.equals(latestVersion)) {
+
+                for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
+                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + " &eA newer version is available: &f" + latestVersion)));
+                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&3Download link 1: &f" + downloadUrl1)));
+                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&bDownload link 2: &f" + downloadUrl2)));
+                }
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }
