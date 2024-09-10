@@ -14,6 +14,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.francies.ReportDiscordPlus.commands.ReportCommand;
 import me.francies.ReportDiscordPlus.utility.DiscordNotifier;
+import me.francies.ReportDiscordPlus.utility.PlayerLoginListener;
 import me.francies.ReportDiscordPlus.utility.StaffNotifier;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
@@ -69,7 +70,7 @@ public class ReportDiscordPlus extends Plugin {
         this.staffNotifier = new StaffNotifier(titleText, subTitleText, messages);
 
         getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
-
+        getProxy().getPluginManager().registerListener(this, new PlayerLoginListener(this));
     }
 
     public void onDisable() {
@@ -191,12 +192,9 @@ public class ReportDiscordPlus extends Plugin {
                 if (!currentVersion.equals(latestVersion)) {
 
                     for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
-                        if (staffMember.hasPermission("report.admin")) {
                             staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + " &eA newer version is available: &f" + latestVersion)));
                             staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&3Download link 1: &f" + downloadUrl1)));
                             staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&bDownload link 2: &f" + downloadUrl2)));
-                        }
-
                     }
 
                 }
