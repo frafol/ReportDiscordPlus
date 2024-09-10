@@ -22,7 +22,9 @@ permissions:
     default: op
   report.protection:
     description: Allows to not be reported
-
+  report.admin:
+    description: Allows to se update check
+    default: op
 commands:
   report:
   description: Report a player with a specific reason

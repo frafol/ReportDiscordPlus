@@ -189,13 +189,19 @@ public class ReportDiscordPlus extends Plugin {
                 String currentVersion = this.getDescription().getVersion();
 
                 if (!currentVersion.equals(latestVersion)) {
-                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("prefix-private") + " &eA newer version is available: &f" + latestVersion)));
-                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("prefix-private") + "&3Download link 1: &f" + downloadUrl1)));
-                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("prefix-private") + "&bDownload link 2: &f" + downloadUrl2)));
+
+                    for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
+                        if (staffMember.hasPermission("report.admin")) {
+                            staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + " &eA newer version is available: &f" + latestVersion)));
+                            staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&3Download link 1: &f" + downloadUrl1)));
+                            staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&bDownload link 2: &f" + downloadUrl2)));
+                        }
+
+                    }
+
                 }
 
             } catch (Exception e) {
-                ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("§cErrore durante il controllo aggiornamenti."));
                 e.printStackTrace();
             }
         }, 0L, updateInterval, TimeUnit.SECONDS);
