@@ -1,17 +1,23 @@
 package me.francies.ReportDiscordPlus;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import me.francies.ReportDiscordPlus.commands.ReportCommand;
 import me.francies.ReportDiscordPlus.utility.DiscordNotifier;
 import me.francies.ReportDiscordPlus.utility.StaffNotifier;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -31,9 +37,11 @@ public class ReportDiscordPlus extends Plugin {
 
     private DiscordNotifier discordNotifier;
     private StaffNotifier staffNotifier;
+    private final String versionUrl = "https://www.franciesdev.it/api/reportdiscordplus.json";
+    int updateInterval = getConfig().getInt("update-check-interval", 86400);
 
     public void onEnable() {
-
+        checkForUpdates();
         int pluginId = 23259;
         Metrics metrics = new Metrics(this, pluginId);
 
@@ -153,4 +161,44 @@ public class ReportDiscordPlus extends Plugin {
     public StaffNotifier getStaffNotifier() {
         return staffNotifier;
     }
+    public void checkForUpdates() {
+        ProxyServer.getInstance().getScheduler().schedule(this, () -> {
+
+            try {
+
+                URL url = new URL(versionUrl);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder content = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                }
+
+                in.close();
+                connection.disconnect();
+
+                JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
+
+                String latestVersion = json.get("version").getAsString();
+                String downloadUrl1 = json.get("downloadUrl1").getAsString();
+                String downloadUrl2 = json.get("downloadUrl2").getAsString();
+
+                String currentVersion = this.getDescription().getVersion();
+
+                if (!currentVersion.equals(latestVersion)) {
+                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("prefix-private") + " &eA newer version is available: &f" + latestVersion)));
+                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("prefix-private") + "&3Download link 1: &f" + downloadUrl1)));
+                    ProxyServer.getInstance().getConsole().sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("prefix-private") + "&bDownload link 2: &f" + downloadUrl2)));
+                }
+
+            } catch (Exception e) {
+                ProxyServer.getInstance().getConsole().sendMessage(new TextComponent("§cErrore durante il controllo aggiornamenti."));
+                e.printStackTrace();
+            }
+        }, 0L, updateInterval, TimeUnit.SECONDS);
+    }
+
 }

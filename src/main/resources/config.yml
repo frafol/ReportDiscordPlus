@@ -14,6 +14,8 @@ discord:
 # Report cooldown time in seconds
 cooldown: 60  # If left empty, the default value will be 60 seconds
 
+# Update Checker
+update-check-interval: 43200 # If left empty, the default value will be 1 day in seconds
 
 # Messages
 messages:
