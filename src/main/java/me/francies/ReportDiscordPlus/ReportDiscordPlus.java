@@ -54,7 +54,7 @@ public class ReportDiscordPlus extends Plugin {
         getLogger().info("  |            |_|                                                                               |");
         getLogger().info("  |                                                                                              |");
         getLogger().info("  +----------------------------------------------------------------------------------------------+");
-        getLogger().info("                                    Versione: 5.2");
+        getLogger().info("                                    Versione: " + getDescription().getVersion());
 
         try {
             loadConfig();
