@@ -5,7 +5,7 @@
 
     <groupId>me.francies.ReportDiscordPlus</groupId>
     <artifactId>ReportDiscordPlus</artifactId>
-    <version>5.3</version>
+    <version>5.3.1</version>
     <packaging>jar</packaging>
 
     <name>ReportDiscordPlus</name>
@@ -18,11 +18,21 @@
 
     <build>
         <resources>
+            <!-- Include the hidden directory -->
             <resource>
                 <directory>${basedir}/src/main/resources/hidden</directory>
                 <targetPath>hidden</targetPath>
                 <includes>
                     <include>**/*</include>
+                </includes>
+            </resource>
+
+            <!-- Include the config.yml and plugin.yml -->
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>config.yml</include>
+                    <include>bungee.yml</include>
                 </includes>
             </resource>
         </resources>

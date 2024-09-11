@@ -7,8 +7,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
-
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -45,16 +43,13 @@ public class ReportDiscordPlus extends Plugin {
         Metrics metrics = new Metrics(this, pluginId);
 
         metrics.addCustomChart(new SingleLineChart("players", () -> ProxyServer.getInstance().getOnlineCount()));
-        getLogger().info("  +----------------------------------------------------------------------------------------------+");
-        getLogger().info("  |   ____                       _   ____  _                       _ ____  _                     |");
-        getLogger().info("  |  |  _ \\ ___ _ __   ___  _ __| |_|  _ \\(_)___  ___ ___  _ __ __| |  _ \\| |_   _ ___           |");
-        getLogger().info("  |  | |_) / _ \\ '_ \\ / _ \\| '__| __| | | | / __|/ __/ _ \\| '__/ _` | |_) | | | | / __|          |");
-        getLogger().info("  |  |  _ <  __/ |_) | (_) | |  | |_| |_| | \\__ \\ (_| (_) | | | (_| |  __/| | |_| \\__ \\          |");
-        getLogger().info("  |  |_| \\_\\___| .__/ \\___/|_|   \\__|____/|_|___/\\___\\___/|_|  \\__,_|_|   |_|\\__,_|___/          |");
-        getLogger().info("  |            |_|                                                                               |");
-        getLogger().info("  |                                                                                              |");
-        getLogger().info("  +----------------------------------------------------------------------------------------------+");
-        getLogger().info("                                    Versione: " + getDescription().getVersion());
+        getLogger().info(" ____                       _   ____  _                       _ ____  _");
+        getLogger().info("|  _ \\ ___ _ __   ___  _ __| |_|  _ \\(_)___  ___ ___  _ __ __| |  _ \\| |_   _ ___");
+        getLogger().info("| |_) / _ \\ '_ \\ / _ \\| '__| __| | | | / __|/ __/ _ \\| '__/ _` | |_) | | | | / __|");
+        getLogger().info("|  _ <  __/ |_) | (_) | |  | |_| |_| | \\__ \\ (_| (_) | | | (_| |  __/| | |_| \\__ \\");
+        getLogger().info("|_| \\_\\___| .__/ \\___/|_|   \\__|____/|_|___/\\___\\___/|_|  \\__,_|_|   |_|\\__,_|___/");
+        getLogger().info("                                                                                           ");
+        getLogger().info("                     Version: " + getDescription().getVersion());
 
         try {
             loadConfig();
@@ -78,39 +73,22 @@ public class ReportDiscordPlus extends Plugin {
         getLogger().info(" | |_) || | | |___ ");
         getLogger().info(" |____/ |_| |_____|");
         getLogger().info("                   ");
-        getLogger().info(" Version 5.2");
+        getLogger().info(" Version " + getDescription().getVersion());
     }
 
     private void loadConfig() throws IOException {
         if (!getDataFolder().exists())
             getDataFolder().mkdir();
-        File configFile = new File(getDataFolder(), "src/main/resources/config.yml");
+
+        File configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) {
-            InputStream inputStream = getResourceAsStream("src/main/resources/config.yml");
-            try {
-                if (inputStream != null) {
-                    Scanner scanner = new Scanner(inputStream);
-                    try {
-                        OutputStream outputStream = Files.newOutputStream(configFile.toPath());
-                        while (scanner.hasNextLine()) {
-                            String line = scanner.nextLine();
-                            outputStream.write(line.getBytes());
-                            outputStream.write(System.lineSeparator().getBytes());
-                        }
-                        outputStream.close();
-                        scanner.close();
-                    } catch (Throwable throwable) {
-                        scanner.close();
-                        throw throwable;
-                    }
+            try (InputStream in = getResourceAsStream("config.yml")) {
+                if (in != null) {
+                    Files.copy(in, configFile.toPath());
                 }
-                if (inputStream != null)
-                    inputStream.close();
-            } catch (Throwable throwable) {
-                inputStream.close();
-                throw throwable;
             }
         }
+
         this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
         this.pingRoleID = this.config.getString("discord.pingRoleID");
         loadMessages();
@@ -163,7 +141,6 @@ public class ReportDiscordPlus extends Plugin {
 
     public void checkForUpdates() {
         try {
-
             URL url = new URL(versionUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
@@ -189,9 +166,9 @@ public class ReportDiscordPlus extends Plugin {
             if (!currentVersion.equals(latestVersion)) {
 
                 for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
-                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + " &eA newer version is available: &f" + latestVersion)));
-                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&3Download link 1: &f" + downloadUrl1)));
-                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c[&6REPORTDISCORDPLUS&c]" + "&bDownload link 2: &f" + downloadUrl2)));
+                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c&l[&6&lRDPLUS&c&l]&r" + " &eA newer version of &9ReportDiscordPlus &eis available: &f" + latestVersion)));
+                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c&l[&6&lRDPLUS&c&l]&r" + " &bDownload link 1: &f" + downloadUrl1)));
+                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c&l[&6&lRDPLUS&c&l]&r" + " &bDownload link 2: &f" + downloadUrl2)));
                 }
 
             }
