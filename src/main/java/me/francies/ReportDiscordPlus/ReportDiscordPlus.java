@@ -30,13 +30,12 @@ public class ReportDiscordPlus extends Plugin {
     private Configuration config;
     private Map<String, String> messages;
     public HashMap<String, Long> cooldowns = new HashMap<>();
-    public String pingRoleID;
     String titleText;
     String subTitleText;
 
     private DiscordNotifier discordNotifier;
     private StaffNotifier staffNotifier;
-    private final String versionUrl = "https://www.franciesdev.it/api/reportdiscordplus.json";
+    private final String versionUrl = "https://www.francescoferrara.it/api/reportdiscordplus.json";
 
     public void onEnable() {
         int pluginId = 23259;
@@ -90,7 +89,6 @@ public class ReportDiscordPlus extends Plugin {
         }
 
         this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
-        this.pingRoleID = this.config.getString("discord.pingRoleID");
         loadMessages();
     }
 
