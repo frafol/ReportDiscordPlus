@@ -1,6 +1,7 @@
-package me.francies.ReportDiscordPlus.utility;
+package bungee.me.francies.ReportDiscordPlus.utility;
 
-import me.francies.ReportDiscordPlus.ReportDiscordPlus;
+
+import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;

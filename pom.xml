@@ -5,7 +5,7 @@
 
     <groupId>me.francies.ReportDiscordPlus</groupId>
     <artifactId>ReportDiscordPlus</artifactId>
-    <version>5.3.1</version>
+    <version>6.0</version>
     <packaging>jar</packaging>
 
     <name>ReportDiscordPlus</name>
@@ -17,25 +17,6 @@
     </properties>
 
     <build>
-        <resources>
-            <!-- Include the hidden directory -->
-            <resource>
-                <directory>${basedir}/src/main/resources/hidden</directory>
-                <targetPath>hidden</targetPath>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-
-            <!-- Include the config.yml and plugin.yml -->
-            <resource>
-                <directory>${basedir}/src/main/resources</directory>
-                <includes>
-                    <include>config.yml</include>
-                    <include>bungee.yml</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -51,32 +32,25 @@
                                 <exclude>gnu/**</exclude>
                                 <exclude>kotlin/**</exclude>
                                 <exclude>net/**</exclude>
-
                                 <exclude>org/**</exclude>
-                                <include>org/bstats/**</include>
+                                <include>org/bstats/**</include> <!-- Include tutte le classi di bStats -->
                             </excludes>
-                        </filter>
-                        <filter>
-                            <artifact>net.dv8tion:JDA</artifact>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                        </filter>
-                        <filter>
-                            <artifact>net.md-5</artifact>
-                            <includes>
-                                <include>**</include>
-                            </includes>
                         </filter>
                     </filters>
                     <relocations>
                         <relocation>
                             <pattern>org.bstats</pattern>
+                            <shadedPattern>hidden.org.bstats</shadedPattern> <!-- Relocation su hidden.org.bstats -->
                         </relocation>
                     </relocations>
                     <transformers>
+                        <!-- Manifest per BungeeCord -->
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>me.francies.ReportDiscordPlus.ReportDiscordPlus</mainClass>
+                            <mainClass>bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus</mainClass>
+                        </transformer>
+                        <!-- Risorse per Velocity -->
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                            <resource>velocity-plugin.json</resource>
                         </transformer>
                     </transformers>
                     <minimizeJar>true</minimizeJar>
@@ -100,7 +74,41 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
+
     <dependencies>
+        <!-- Velocity API -->
+        <dependency>
+            <groupId>com.velocitypowered</groupId>
+            <artifactId>velocity-api</artifactId>
+            <version>3.3.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- BungeeCord API -->
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>1.21-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- bStats per Velocity -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-velocity</artifactId>
+            <version>3.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- bStats per BungeeCord -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bungeecord</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- JDA per Discord integration -->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
@@ -114,21 +122,11 @@
             </exclusions>
         </dependency>
 
-
+        <!-- Configurate HOCON -->
         <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.21-R0.1-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bungeecord</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-hocon</artifactId>
+            <version>4.1.1</version>
         </dependency>
     </dependencies>
 </project>

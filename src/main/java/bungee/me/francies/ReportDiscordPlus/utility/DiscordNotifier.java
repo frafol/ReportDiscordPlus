@@ -1,4 +1,4 @@
-package me.francies.ReportDiscordPlus.utility;
+package bungee.me.francies.ReportDiscordPlus.utility;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package me.francies.ReportDiscordPlus;
+package bungee.me.francies.ReportDiscordPlus;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -6,14 +6,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
+import bungee.me.francies.ReportDiscordPlus.commands.ReportCommand;
+import bungee.me.francies.ReportDiscordPlus.utility.DiscordNotifier;
+import bungee.me.francies.ReportDiscordPlus.utility.PlayerLoginListener;
+import bungee.me.francies.ReportDiscordPlus.utility.StaffNotifier;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.francies.ReportDiscordPlus.commands.ReportCommand;
-import me.francies.ReportDiscordPlus.utility.DiscordNotifier;
-import me.francies.ReportDiscordPlus.utility.PlayerLoginListener;
-import me.francies.ReportDiscordPlus.utility.StaffNotifier;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -40,7 +39,9 @@ public class ReportDiscordPlus extends Plugin {
     public void onEnable() {
         int pluginId = 23259;
         Metrics metrics = new Metrics(this, pluginId);
-
+        if (!isBungeeCord()) {
+            return;
+        }
         metrics.addCustomChart(new SingleLineChart("players", () -> ProxyServer.getInstance().getOnlineCount()));
         getLogger().info(" ____                       _   ____  _                       _ ____  _");
         getLogger().info("|  _ \\ ___ _ __   ___  _ __| |_|  _ \\(_)___  ___ ___  _ __ __| |  _ \\| |_   _ ___");
@@ -74,7 +75,14 @@ public class ReportDiscordPlus extends Plugin {
         getLogger().info("                   ");
         getLogger().info(" Version " + getDescription().getVersion());
     }
-
+    private boolean isBungeeCord() {
+        try {
+            Class.forName("net.md_5.bungee.api.ProxyServer");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
     private void loadConfig() throws IOException {
         if (!getDataFolder().exists())
             getDataFolder().mkdir();

@@ -1,4 +1,4 @@
-package me.francies.ReportDiscordPlus.utility;
+package bungee.me.francies.ReportDiscordPlus.utility;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;

@@ -14,9 +14,6 @@ discord:
 # Report cooldown time in seconds
 cooldown: 60  # If left empty, the default value will be 60 seconds
 
-# Update Checker
-update-check-interval: 43200 # If left empty, the default value will be 1 day in seconds
-
 # Messages
 messages:
   playerNotFound: "&6&lReport&7&lDSPL &cPlayer not found."
@@ -32,7 +29,6 @@ messages:
 
 title: "&6&lNEW REPORT"
 subtitle: "&9READ BELOW"
-
 
 
 # Permissions:

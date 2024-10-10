@@ -1,6 +1,7 @@
-package me.francies.ReportDiscordPlus.commands;
+package bungee.me.francies.ReportDiscordPlus.commands;
 
-import me.francies.ReportDiscordPlus.ReportDiscordPlus;
+
+import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
