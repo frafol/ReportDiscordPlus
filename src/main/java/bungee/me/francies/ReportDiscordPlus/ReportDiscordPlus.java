@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import bungee.me.francies.ReportDiscordPlus.commands.ReportCommand;
+import bungee.me.francies.ReportDiscordPlus.commands.VerifyReportCommand;
 import bungee.me.francies.ReportDiscordPlus.utility.DiscordNotifier;
 import bungee.me.francies.ReportDiscordPlus.utility.PlayerLoginListener;
 import bungee.me.francies.ReportDiscordPlus.utility.StaffNotifier;
@@ -39,9 +40,6 @@ public class ReportDiscordPlus extends Plugin {
     public void onEnable() {
         int pluginId = 23259;
         Metrics metrics = new Metrics(this, pluginId);
-        if (!isBungeeCord()) {
-            return;
-        }
         metrics.addCustomChart(new SingleLineChart("players", () -> ProxyServer.getInstance().getOnlineCount()));
         getLogger().info(" ____                       _   ____  _                       _ ____  _");
         getLogger().info("|  _ \\ ___ _ __   ___  _ __| |_|  _ \\(_)___  ___ ___  _ __ __| |  _ \\| |_   _ ___");
@@ -60,8 +58,8 @@ public class ReportDiscordPlus extends Plugin {
         subTitleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("subtitle"));
 
         this.discordNotifier = new DiscordNotifier(config, getLogger(), messages);
-        this.staffNotifier = new StaffNotifier(titleText, subTitleText, messages);
-
+        this.staffNotifier = new StaffNotifier(titleText, subTitleText, messages, this);
+        getProxy().getPluginManager().registerCommand(this, new VerifyReportCommand(this));
         getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
         getProxy().getPluginManager().registerListener(this, new PlayerLoginListener(this));
     }
@@ -75,14 +73,7 @@ public class ReportDiscordPlus extends Plugin {
         getLogger().info("                   ");
         getLogger().info(" Version " + getDescription().getVersion());
     }
-    private boolean isBungeeCord() {
-        try {
-            Class.forName("net.md_5.bungee.api.ProxyServer");
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
+
     private void loadConfig() throws IOException {
         if (!getDataFolder().exists())
             getDataFolder().mkdir();
@@ -152,8 +143,8 @@ public class ReportDiscordPlus extends Plugin {
             connection.setRequestMethod("GET");
 
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine;
             StringBuilder content = new StringBuilder();
+            String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
             }
@@ -162,26 +153,41 @@ public class ReportDiscordPlus extends Plugin {
             connection.disconnect();
 
             JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
-
             String latestVersion = json.get("version").getAsString();
             String downloadUrl1 = json.get("downloadUrl1").getAsString();
-            String downloadUrl2 = json.get("downloadUrl2").getAsString();
 
             String currentVersion = this.getDescription().getVersion();
 
             if (!currentVersion.equals(latestVersion)) {
+                String updateMessage = getConfigMessage("updateMessages.header")
+                        .replace("{currentVersion}", currentVersion)
+                        .replace("{latestVersion}", latestVersion);
 
+                String versionInfo = getConfigMessage("updateMessages.versionMessage")
+                        .replace("{currentVersion}", currentVersion)
+                        .replace("{latestVersion}", latestVersion);
+
+                String downloadMessage1 = getConfigMessage("updateMessages.downloadMessage")
+                        .replace("{downloadUrl}", downloadUrl1);
+
+
+                // Invia i messaggi configurabili a tutti gli utenti con permesso
                 for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
-                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c&l[&6&lRDPLUS&c&l]&r" + " &eA newer version of &9ReportDiscordPlus &eis available: &f" + latestVersion)));
-                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c&l[&6&lRDPLUS&c&l]&r" + " &bDownload link 1: &f" + downloadUrl1)));
-                    staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c&l[&6&lRDPLUS&c&l]&r" + " &bDownload link 2: &f" + downloadUrl2)));
+                    if (staffMember.hasPermission("report.admin")) {
+                        staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', updateMessage)));
+                        staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', versionInfo)));
+                        staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', downloadMessage1)));
+                    }
                 }
-
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    // Metodo per ottenere i messaggi dal file di configurazione
+    private String getConfigMessage(String path) {
+        return getConfig().getString(path, "Message not found in config: " + path);
     }
 }

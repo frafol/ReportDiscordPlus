@@ -27,8 +27,21 @@ messages:
   staffAlert: "&6&lReport&7&lDSPL &6&lNew report available!&r &6Player: &9{player} &6- Reported Player: &9{reportedPlayer} &6- Reason: &9{reason} &6- Server: &9{server}"
   myself: "&6&lReport&7&lDSPL &cYou cannot report yourself!"
 
-title: "&6&lNEW REPORT"
-subtitle: "&9READ BELOW"
+title: "&6&lNEW REPORT FROM {player}"
+subtitle: "&9{reportedPlayer} has been reported for {reason} on {server}"
+
+button:
+  show_text_server_button: "&bTeleport to the server"
+  show_text_tp_button: "&bTeleport to the reported player"
+  teleport_to_server: "&6TP-SERVER"
+  teleport_to_player: "&aTP-PLAYER"
+  separator: "&6&l-"
+
+updateMessages:
+  header: "&c&l[&6&lRDPLUS&c&l]&r &eA newer version of &9ReportDiscordPlus &eis available!"
+  versionMessage: "&c&l[&6&lRDPLUS&c&l]&r &eCurrent version: &f{currentVersion} &7| &eNew version: &f{latestVersion}"
+  downloadMessage: "&c&l[&6&lRDPLUS&c&l]&r &bDownload link: &f{downloadUrl}"
+
 
 
 # Permissions:
@@ -37,3 +50,4 @@ subtitle: "&9READ BELOW"
 # report.mcreport       - Permit to view a staff alert message when a new report is made
 # report.protection     - Grant immunity to be reported
 # report.tp             - Allows you to instantly teleport to the reported player
+# report.admin          - Allows to see update check
