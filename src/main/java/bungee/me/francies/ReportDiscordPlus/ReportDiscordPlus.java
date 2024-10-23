@@ -4,12 +4,16 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import bungee.me.francies.ReportDiscordPlus.commands.ReportCommand;
-import bungee.me.francies.ReportDiscordPlus.commands.VerifyReportCommand;
+import bungee.me.francies.ReportDiscordPlus.commands.*;
 import bungee.me.francies.ReportDiscordPlus.utility.DiscordNotifier;
+import bungee.me.francies.ReportDiscordPlus.utility.PlayerJoinListenerReports;
 import bungee.me.francies.ReportDiscordPlus.utility.PlayerLoginListener;
 import bungee.me.francies.ReportDiscordPlus.utility.StaffNotifier;
 import com.google.gson.JsonObject;
@@ -22,17 +26,16 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import org.bstats.bungeecord.Metrics;
-import org.bstats.charts.SingleLineChart;
+
 
 public class ReportDiscordPlus extends Plugin {
-
     private Configuration config;
     private Map<String, String> messages;
     public HashMap<String, Long> cooldowns = new HashMap<>();
     String titleText;
     String subTitleText;
-
+    private Configuration reportsConfig;
+    private File reportsFile;
     private DiscordNotifier discordNotifier;
     private StaffNotifier staffNotifier;
     private final String versionUrl = "https://www.francescoferrara.it/api/reportdiscordplus.json";
@@ -40,7 +43,7 @@ public class ReportDiscordPlus extends Plugin {
     public void onEnable() {
         int pluginId = 23259;
         Metrics metrics = new Metrics(this, pluginId);
-        metrics.addCustomChart(new SingleLineChart("players", () -> ProxyServer.getInstance().getOnlineCount()));
+        metrics.addCustomChart(new Metrics.SingleLineChart("players", () -> ProxyServer.getInstance().getOnlineCount()));
         getLogger().info(" ____                       _   ____  _                       _ ____  _");
         getLogger().info("|  _ \\ ___ _ __   ___  _ __| |_|  _ \\(_)___  ___ ___  _ __ __| |  _ \\| |_   _ ___");
         getLogger().info("| |_) / _ \\ '_ \\ / _ \\| '__| __| | | | / __|/ __/ _ \\| '__/ _` | |_) | | | | / __|");
@@ -48,7 +51,12 @@ public class ReportDiscordPlus extends Plugin {
         getLogger().info("|_| \\_\\___| .__/ \\___/|_|   \\__|____/|_|___/\\___\\___/|_|  \\__,_|_|   |_|\\__,_|___/");
         getLogger().info("                                                                                           ");
         getLogger().info("                     Version: " + getDescription().getVersion());
+        File pluginFolder = this.getDataFolder();
+        if (!pluginFolder.exists()) {
+            pluginFolder.mkdirs();
+        }
 
+        loadReportsConfig();
         try {
             loadConfig();
         } catch (IOException e) {
@@ -56,12 +64,22 @@ public class ReportDiscordPlus extends Plugin {
         }
         titleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("title"));
         subTitleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("subtitle"));
-
         this.discordNotifier = new DiscordNotifier(config, getLogger(), messages);
         this.staffNotifier = new StaffNotifier(titleText, subTitleText, messages, this);
         getProxy().getPluginManager().registerCommand(this, new VerifyReportCommand(this));
         getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
         getProxy().getPluginManager().registerListener(this, new PlayerLoginListener(this));
+        getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
+        getProxy().getPluginManager().registerCommand(this, new ReportListCommand(this));
+        getProxy().getPluginManager().registerCommand(this, new ReportCloseCommand(this));
+        getProxy().getPluginManager().registerCommand(this, new ReportReopenCommand(this));
+        getProxy().getPluginManager().registerCommand(this, new ReportDeleteCommand(this));
+        getProxy().getPluginManager().registerListener(this, new PlayerJoinListenerReports(this));
+        String version = getConfigMessage("config_version");
+        if (!version.equalsIgnoreCase("2")) {
+            getLogger().severe("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
+        }
+
     }
 
     public void onDisable() {
@@ -74,6 +92,60 @@ public class ReportDiscordPlus extends Plugin {
         getLogger().info(" Version " + getDescription().getVersion());
     }
 
+    public String replacePlaceholders(String message, Map<String, String> placeholders) {
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
+        }
+        return ChatColor.translateAlternateColorCodes('&', message);
+    }
+
+    public void loadReportsConfig() {
+        reportsFile = new File(getDataFolder(), "reports.yml");
+        if (!reportsFile.exists()) {
+            try {
+                reportsFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            reportsConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(reportsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Se non esiste un 'lastReportId', inizializzalo a 0
+        if (!reportsConfig.contains("lastReportId")) {
+            reportsConfig.set("lastReportId", 0);
+            saveReportsConfig();
+        }
+    }
+
+    // Metodo per ottenere il prossimo ID autoincrementato
+    public int getNextReportId() {
+        // Recupera l'ultimo ID usato
+        int lastReportId = reportsConfig.getInt("lastReportId", 0);
+
+        // Incrementa l'ID e aggiornalo nel file YAML
+        int newReportId = lastReportId + 1;
+        reportsConfig.set("lastReportId", newReportId);
+        saveReportsConfig();
+
+        return newReportId;
+    }
+
+    public void saveReportsConfig() {
+        try {
+            ConfigurationProvider.getProvider(YamlConfiguration.class).save(reportsConfig, reportsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public Configuration getReportsConfig() {
+        return reportsConfig;
+    }
     private void loadConfig() throws IOException {
         if (!getDataFolder().exists())
             getDataFolder().mkdir();

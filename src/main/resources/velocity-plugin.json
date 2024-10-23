@@ -1,0 +1,59 @@
+{
+  "id": "reportdiscordplus",
+  "name": "ReportDiscordPlus",
+  "version": "6.5",
+  "description": "A plugin that implements Reports on your server",
+  "authors": [
+    "Francies"
+  ],
+  "main": "velocity.dev.francies.ultimatevelocityreports.UltimateVelocityReports",
+  "dependencies": [],
+  "commands": {
+    "report": {
+      "description": "Report a player with a specific reason",
+      "permission": "report.use"
+    },
+    "reports": {
+      "description": "Manage reports",
+      "permission": "report.admin"
+    },
+    "rpclose": {
+      "description": "Close a report",
+      "permission": "report.admin"
+    },
+    "rpdelete": {
+      "description": "Delete a report",
+      "permission": "report.admin"
+    },
+    "rpreopen": {
+      "description": "Reopen a report",
+      "permission": "report.admin"
+    }
+  },
+  "permissions": {
+    "report.use": {
+      "description": "Allows you to use the /report command",
+      "default": "op"
+    },
+    "report.bypasstime": {
+      "description": "Allows you to send reports without cooldown",
+      "default": "op"
+    },
+    "report.mcreport": {
+      "description": "Allows you to see new report alerts without checking Discord",
+      "default": "op"
+    },
+    "report.tp": {
+      "description": "Allows you to instantly teleport to the reported player",
+      "default": "op"
+    },
+    "report.protection": {
+      "description": "Prevents the player from being reported",
+      "default": "op"
+    },
+    "report.admin": {
+      "description": "Admin permissions",
+      "default": "op"
+    }
+  }
+}

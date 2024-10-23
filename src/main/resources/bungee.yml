@@ -1,5 +1,5 @@
 name: ReportDiscordPlus
-version: '6.0'
+version: '6.5'
 main: bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus
 author: Francies
 api-version: '1.13'
@@ -23,10 +23,19 @@ permissions:
   report.protection:
     description: Allows to not be reported
   report.admin:
-    description: Allows to se update check
+    description: Admins perms
     default: op
 commands:
   report:
   description: Report a player with a specific reason
   usage: /report <player> <reason>
   permission: report.use
+  reports:
+   description: Manage reports
+   permission: report.admin
+  rpclose:
+    permission: report.admin
+  rpdelete:
+    permission: report.admin
+  rpreopen:
+    permission: report.admin
