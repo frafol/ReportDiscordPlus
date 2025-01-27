@@ -28,6 +28,13 @@ public class DiscordNotifier {
         String title = this.config.node("discord", "title").getString();
         String alert = this.config.node("discord", "alert").getString();
         String pingRoleId = this.config.node("discord", "pingRoleID").getString();
+        int color = this.config.node("discord", "embedColor").getInt(16711680); // Colore di default rosso
+
+        // Titoli configurabili
+        String reporterTitle = this.config.node("discord", "fields", "reporter").getString("Reporter");
+        String reportedTitle = this.config.node("discord", "fields", "reported").getString("Reported");
+        String reasonTitle = this.config.node("discord", "fields", "reason").getString("Reason");
+        String serverTitle = this.config.node("discord", "fields", "server").getString("Server");
 
         String content = "<@&" + pingRoleId + "> " + alert;
 
@@ -35,12 +42,12 @@ public class DiscordNotifier {
                 + "\"content\": \"" + content + "\","
                 + "\"embeds\": [{"
                 + "\"title\": \"" + title + "\","
-                + "\"color\": 16711680,"
+                + "\"color\": " + color + ","
                 + "\"fields\": ["
-                + "{ \"name\": \"Reporter\", \"value\": \"🟢 " + reporter + "\", \"inline\": false },"
-                + "{ \"name\": \"Reported\", \"value\": \"🔴 " + reportedPlayer + "\", \"inline\": false },"
-                + "{ \"name\": \"Reason\", \"value\": \"💬 " + reason + "\", \"inline\": false },"
-                + "{ \"name\": \"Server\", \"value\": \"💻 " + server + "\", \"inline\": false }"
+                + "{ \"name\": \"" + reporterTitle + "\", \"value\": \"🟢 " + reporter + "\", \"inline\": false },"
+                + "{ \"name\": \"" + reportedTitle + "\", \"value\": \"🔴 " + reportedPlayer + "\", \"inline\": false },"
+                + "{ \"name\": \"" + reasonTitle + "\", \"value\": \"💬 " + reason + "\", \"inline\": false },"
+                + "{ \"name\": \"" + serverTitle + "\", \"value\": \"💻 " + server + "\", \"inline\": false }"
                 + "]"
                 + "}]"
                 + "}";

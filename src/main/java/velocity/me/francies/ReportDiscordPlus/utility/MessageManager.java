@@ -3,8 +3,11 @@ package velocity.me.francies.ReportDiscordPlus.utility;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MessageManager {
 
@@ -25,12 +28,26 @@ public class MessageManager {
         }
         return replacePlaceholders(message, placeholders);
     }
-
+    public List<String> getRawMessageList(String path) throws SerializationException {
+        return config.node((Object[]) path.split("\\.")).getList(String.class, List.of());
+    }
     public Component getComponentMessage(String path, Map<String, String> placeholders) {
         String message = getMessage(path, placeholders);
         return LegacyComponentSerializer.legacyAmpersand().deserialize(message);
     }
-
+    // Metodo per ottenere una lista di messaggi con segnaposto sostituiti
+    public List<String> getMessageList(String path, Map<String, String> placeholders) throws SerializationException {
+        List<String> messages = getRawMessageList(path);
+        return messages.stream()
+                .map(message -> replacePlaceholders(message, placeholders))
+                .collect(Collectors.toList());
+    }
+    public List<Component> getComponentMessageList(String path, Map<String, String> placeholders) throws SerializationException {
+        List<String> messages = getMessageList(path, placeholders);
+        return messages.stream()
+                .map(LegacyComponentSerializer.legacyAmpersand()::deserialize)
+                .collect(Collectors.toList());
+    }
     public String replacePlaceholders(String message, Map<String, String> placeholders) {
         if (message == null || placeholders == null) {
             return message != null ? message : "";

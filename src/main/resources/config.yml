@@ -4,14 +4,19 @@
 #
 # These settings are very important for the plugin to work
 
-config_version: "2"
+config_version: "3"
 
 discord:
   webhookUrl: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
   pingRoleID: "YOUR_DISCORD_PING_ROLE_ID"
   allert: ":warning: New report available! :warning:"
   title: ":hammer_pick: ReportDiscordPlus :hammer_pick:"
-  reaction: "\uD83D\uDC4D"
+  embedColor: 65280 # Color RGB format
+  fields:
+    reporter: "Segnalatore"
+    reported: "Segnalato"
+    reason: "Motivo"
+    server: "Server"
 
 # Report cooldown time in seconds
 cooldown: 60  # If left empty, the default value will be 60 seconds
@@ -59,8 +64,9 @@ button:
   teleport_to_player: "&aTP-PLAYER"
   separator: "&6&l-"
 
-updateMessages:
-  header: "&c&l[&6&lRDPLUS&c&l]&r &eA newer version of &9ReportDiscordPlus &eis available!"
-  versionMessage: "&c&l[&6&lRDPLUS&c&l]&r &eCurrent version: &f{currentVersion} &7| &eNew version: &f{latestVersion}"
-  downloadMessage: "&c&l[&6&lRDPLUS&c&l]&r &bDownload link: &f{downloadUrl}"
+updateMessage:
+  - "&c&l[&6&lRDPLUS&c&l]&r &eUna nuova versione di &9ReportDiscordPlus &eè disponibile!"
+  - "&eVersione corrente: &f{currentVersion} &7| &eNuova versione: &f{latestVersion}"
+  - "&bLink per il download: &f{downloadUrl}"
+
 

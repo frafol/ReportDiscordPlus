@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import bungee.me.francies.ReportDiscordPlus.commands.*;
@@ -76,7 +77,7 @@ public class ReportDiscordPlus extends Plugin {
         getProxy().getPluginManager().registerCommand(this, new ReportDeleteCommand(this));
         getProxy().getPluginManager().registerListener(this, new PlayerJoinListenerReports(this));
         String version = getConfigMessage("config_version");
-        if (!version.equalsIgnoreCase("2")) {
+        if (!version.equalsIgnoreCase("3")) {
             getLogger().severe("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
 
@@ -231,25 +232,25 @@ public class ReportDiscordPlus extends Plugin {
             String currentVersion = this.getDescription().getVersion();
 
             if (!currentVersion.equals(latestVersion)) {
-                String updateMessage = getConfigMessage("updateMessages.header")
-                        .replace("{currentVersion}", currentVersion)
-                        .replace("{latestVersion}", latestVersion);
 
-                String versionInfo = getConfigMessage("updateMessages.versionMessage")
-                        .replace("{currentVersion}", currentVersion)
-                        .replace("{latestVersion}", latestVersion);
+                List<String> updateMessages = getConfig().getStringList("updateMessage");
 
-                String downloadMessage1 = getConfigMessage("updateMessages.downloadMessage")
-                        .replace("{downloadUrl}", downloadUrl1);
+                if (updateMessages != null && !updateMessages.isEmpty()) {
 
-
-                // Invia i messaggi configurabili a tutti gli utenti con permesso
-                for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
-                    if (staffMember.hasPermission("report.admin")) {
-                        staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', updateMessage)));
-                        staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', versionInfo)));
-                        staffMember.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', downloadMessage1)));
+                    for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
+                        if (staffMember.hasPermission("report.admin")) {
+                            for (String line : updateMessages) {
+                                String formattedMessage = ChatColor.translateAlternateColorCodes('&',
+                                        line.replace("{currentVersion}", currentVersion)
+                                                .replace("{latestVersion}", latestVersion)
+                                                .replace("{downloadUrl}", downloadUrl1));
+                                staffMember.sendMessage(new TextComponent(formattedMessage));
+                            }
+                        }
                     }
+                } else {
+
+                    ProxyServer.getInstance().getLogger().warning("updatedMessage is not configured properly.");
                 }
             }
 
@@ -258,7 +259,7 @@ public class ReportDiscordPlus extends Plugin {
         }
     }
 
-    // Metodo per ottenere i messaggi dal file di configurazione
+
     private String getConfigMessage(String path) {
         return getConfig().getString(path, "Message not found in config: " + path);
     }

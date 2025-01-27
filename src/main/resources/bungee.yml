@@ -1,5 +1,5 @@
 name: ReportDiscordPlus
-version: '6.5'
+version: '6.6'
 main: bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus
 author: Francies
 api-version: '1.13'

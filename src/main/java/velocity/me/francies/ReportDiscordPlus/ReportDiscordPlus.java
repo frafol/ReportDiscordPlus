@@ -27,6 +27,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +43,7 @@ public class ReportDiscordPlus {
     private DiscordNotifier discordNotifier;
     private StaffNotifier staffNotifier;
     private MessageManager messageManager;
-    private final String versionUrl = "https://www.francescoferrara.it/api/ultimatevelocityreports.json";
+    private final String versionUrl = "https://www.francescoferrara.it/api/reportdiscordplus.json";
     private final Metrics.Factory metricsFactory;
     private int minLength;
     private int maxLength;
@@ -104,7 +105,7 @@ public class ReportDiscordPlus {
         // Avvia il controllo degli aggiornamenti
         checkForUpdates();
         String version = messageManager.getRawMessage("config_version");
-        if (!version.equalsIgnoreCase("2")) {
+        if (!version.equalsIgnoreCase("3")) {
             logger.error("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
     }
@@ -332,6 +333,7 @@ public class ReportDiscordPlus {
     public void checkForUpdates() {
         server.getScheduler().buildTask(this, () -> {
             try {
+                // Connessione per ottenere le informazioni sulla versione
                 URL url = new URL(versionUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -346,35 +348,47 @@ public class ReportDiscordPlus {
                 in.close();
                 connection.disconnect();
 
+                // Parsing della risposta JSON
                 JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
                 String latestVersion = json.get("version").getAsString();
                 String downloadUrl1 = json.get("downloadUrl1").getAsString();
 
+                // Ottieni la versione attuale del plugin
                 String currentVersion = getProxy().getVersion().getVersion();
 
+                // Controllo se è necessaria un'update
                 if (!currentVersion.equals(latestVersion)) {
-                    Map<String, String> placeholders = new HashMap<>();
-                    placeholders.put("currentVersion", currentVersion);
-                    placeholders.put("latestVersion", latestVersion);
-                    placeholders.put("downloadUrl", downloadUrl1);
+                    // Preparazione dei segnaposto
+                    Map<String, String> placeholders = Map.of(
+                            "currentVersion", currentVersion,
+                            "latestVersion", latestVersion,
+                            "downloadUrl", downloadUrl1
+                    );
 
-                    Component updateMessage = messageManager.getComponentMessage("updateMessages.header", placeholders);
-                    Component versionInfo = messageManager.getComponentMessage("updateMessages.versionMessage", placeholders);
-                    Component downloadMessage = messageManager.getComponentMessage("updateMessages.downloadMessage", placeholders);
+                    // Leggi la lista di messaggi dalla configurazione
+                    List<String> updateMessages = messageManager.getRawMessageList("updateMessage");
 
-                    // Invia i messaggi agli admin
-                    for (Player staffMember : server.getAllPlayers()) {
-                        if (staffMember.hasPermission("report.admin")) {
-                            staffMember.sendMessage(updateMessage);
-                            staffMember.sendMessage(versionInfo);
-                            staffMember.sendMessage(downloadMessage);
+                    if (updateMessages != null && !updateMessages.isEmpty()) {
+                        // Invio dei messaggi di aggiornamento agli admin
+                        for (Player staffMember : server.getAllPlayers()) {
+                            if (staffMember.hasPermission("report.admin")) {
+                                for (String line : updateMessages) {
+                                    String formattedLine = messageManager.replacePlaceholders(line, placeholders);
+                                    staffMember.sendMessage(messageManager.deserializeMessage(formattedLine));
+                                }
+                            }
                         }
+                    } else {
+
+                        logger.warn("updateMessage have not been set properly.");
                     }
                 }
 
             } catch (Exception e) {
-                logger.error(e.toString());
+                logger.error("Error during the update check: ", e);
             }
         }).delay(10, TimeUnit.SECONDS).schedule();
     }
+
+
 }

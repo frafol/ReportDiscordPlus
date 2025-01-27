@@ -35,8 +35,19 @@ public class PlayerJoinListenerReports implements Listener {
             // Se ci sono report aperti, invia il messaggio
             if (openReports > 0) {
                 String messageTemplate = plugin.getConfig().getString("messages.openReportsMessage");
-                String message = messageTemplate.replace("{amount}", String.valueOf(openReports));
-                player.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
+
+                // Assicurati che il messaggio non sia nullo
+                if (messageTemplate != null) {
+                    // Sostituisci il segnaposto e traduci i codici colore
+                    String message = ChatColor.translateAlternateColorCodes('&',
+                            messageTemplate.replace("{amount}", String.valueOf(openReports)));
+
+                    // Invia il messaggio al giocatore
+                    player.sendMessage(new TextComponent(message));
+                } else {
+                    // Log in caso il messaggio non sia definito
+                    plugin.getLogger().warning("Il messaggio 'openReportsMessage' is not configured properly.");
+                }
             }
         }
     }

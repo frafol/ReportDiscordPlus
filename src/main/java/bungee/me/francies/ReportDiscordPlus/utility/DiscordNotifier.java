@@ -25,8 +25,15 @@ public class DiscordNotifier {
     public void sendReportToDiscord(String reporter, String reportedPlayer, String reason, String server) {
         String webhookUrl = this.config.getString("discord.webhookUrl");
         String title = this.config.getString("discord.title");
-        String alert = this.config.getString("discord.allert");
+        String alert = this.config.getString("discord.alert");
         String pingRoleId = this.config.getString("discord.pingRoleID");
+        int color = this.config.getInt("discord.embedColor", 16711680);
+
+
+        String reporterTitle = this.config.getString("discord.fields.reporter", "Reporter");
+        String reportedTitle = this.config.getString("discord.fields.reported", "Reported");
+        String reasonTitle = this.config.getString("discord.fields.reason", "Reason");
+        String serverTitle = this.config.getString("discord.fields.server", "Server");
 
         String content = "<@&" + pingRoleId + "> " + alert;
 
@@ -34,12 +41,12 @@ public class DiscordNotifier {
                 + "\"content\": \"" + content + "\","
                 + "\"embeds\": [{"
                 + "\"title\": \"" + title + "\","
-                + "\"color\": 16711680,"
+                + "\"color\": " + color + ","
                 + "\"fields\": ["
-                + "{ \"name\": \"Reporter\", \"value\": \"🟢 " + reporter + "\", \"inline\": false },"
-                + "{ \"name\": \"Reported\", \"value\": \"🔴 " + reportedPlayer + "\", \"inline\": false },"
-                + "{ \"name\": \"Reason\", \"value\": \"💬 " + reason + "\", \"inline\": false },"
-                + "{ \"name\": \"Server\", \"value\": \"💻 " + server + "\", \"inline\": false }"
+                + "{ \"name\": \"" + reporterTitle + "\", \"value\": \"🟢 " + reporter + "\", \"inline\": false },"
+                + "{ \"name\": \"" + reportedTitle + "\", \"value\": \"🔴 " + reportedPlayer + "\", \"inline\": false },"
+                + "{ \"name\": \"" + reasonTitle + "\", \"value\": \"💬 " + reason + "\", \"inline\": false },"
+                + "{ \"name\": \"" + serverTitle + "\", \"value\": \"💻 " + server + "\", \"inline\": false }"
                 + "]"
                 + "}]"
                 + "}";
