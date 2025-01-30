@@ -5,10 +5,13 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
+import net.md_5.bungee.api.ChatColor;
+import org.spongepowered.configurate.serialize.SerializationException;
 import velocity.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,49 +28,34 @@ public class StaffNotifier {
         this.plugin = plugin;
         this.messageManager = messageManager;
     }
-
-    public void sendReportToMinecraftStaff(Player reporter, String reportedPlayer, String reason, String server) {
+    public void sendReportToMinecraftStaff(Player reporter, String reportedPlayer, String reason, String server) throws SerializationException {
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("player", reporter.getUsername());
         placeholders.put("reportedPlayer", reportedPlayer);
         placeholders.put("reason", reason);
         placeholders.put("server", server);
 
-        // Ottieni il messaggio dello staff dal config
-        String staffMessageTemplate = messageManager.getRawMessage("messages.staffAlert");
-        String staffMessageString = messageManager.replacePlaceholders(staffMessageTemplate, placeholders);
-        Component staffMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(staffMessageString);
+        // Ottieni il messaggio staffAlert come lista di stringhe
+        List<String> staffMessageList = messageManager.getRawMessageList("messages.staffAlert");
+
+        // Se la lista è vuota o nulla, evita errori
+        if (staffMessageList == null || staffMessageList.isEmpty()) {
+            reporter.sendMessage(Component.text(ChatColor.RED + "Staff alert message not found in configuration."));
+            return;
+        }
+
+        // Costruisce il messaggio sostituendo i placeholder in ogni riga
+        StringBuilder staffMessageBuilder = new StringBuilder();
+        for (String line : staffMessageList) {
+            String formattedLine = messageManager.replacePlaceholders(line, placeholders);
+            staffMessageBuilder.append(formattedLine).append("\n");
+        }
+
+        // Converte il messaggio in un componente testuale
+        Component staffMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(staffMessageBuilder.toString());
 
         for (Player staffMember : plugin.getProxy().getAllPlayers()) {
             if (staffMember.hasPermission("report.mcreport")) {
-
-                // Se il membro dello staff ha il permesso per teletrasportarsi, aggiungi i pulsanti
-//                if (staffMember.hasPermission("report.tp")) {
-//                    // Ottieni i testi dei pulsanti dal config
-//                    String teleportToServerText = messageManager.getRawMessage("button.teleport_to_server");
-//                    String teleportToPlayerText = messageManager.getRawMessage("button.teleport_to_player");
-//                    String separatorText = messageManager.getRawMessage("button.separator");
-//
-//                    // Sostituisci i placeholder nei testi dei pulsanti
-//                    teleportToServerText = messageManager.replacePlaceholders(teleportToServerText, placeholders);
-//                    teleportToPlayerText = messageManager.replacePlaceholders(teleportToPlayerText, placeholders);
-//                    separatorText = messageManager.replacePlaceholders(separatorText, placeholders);
-//
-//                    // Crea i componenti dei pulsanti
-//                    Component teleportToServerButton = LegacyComponentSerializer.legacyAmpersand().deserialize(teleportToServerText)
-//                            .clickEvent(ClickEvent.runCommand("/verifyreport server " + reportedPlayer + " " + server));
-//
-//                    Component teleportToPlayerButton = LegacyComponentSerializer.legacyAmpersand().deserialize(teleportToPlayerText)
-//                            .clickEvent(ClickEvent.runCommand("/verifyreport player " + reportedPlayer + " " + server));
-//
-//                    Component separator = LegacyComponentSerializer.legacyAmpersand().deserialize(separatorText);
-//
-//                    // Combina i pulsanti con il separatore
-//                    Component buttons = teleportToServerButton.append(separator).append(teleportToPlayerButton);
-//
-//                    // Aggiungi i pulsanti al messaggio dello staff
-//                    staffMessage = staffMessage.append(Component.newline()).append(buttons);
-//                }
 
                 // Sostituisci i placeholder nel titolo e sottotitolo
                 String titleMessage = messageManager.replacePlaceholders(titleText, placeholders);

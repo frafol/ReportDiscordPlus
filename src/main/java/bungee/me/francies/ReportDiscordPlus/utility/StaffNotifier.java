@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.List;
 import java.util.Map;
 
 public class StaffNotifier {
@@ -33,16 +34,31 @@ public class StaffNotifier {
             return;
         }
 
-        // Sostituzione dei placeholder nel messaggio
-        String staffMessage = messages.get("staffAlert")
-                .replace("{player}", reporter.getName())
-                .replace("{reportedPlayer}", reportedPlayer)
-                .replace("{reason}", reason)
-                .replace("{server}", server);
+        // Recupera il messaggio staffAlert come lista di stringhe
+        List<String> staffMessageList = plugin.getConfig().getStringList("staffAlert");
+
+        // Se la lista è vuota o nulla, evita errori
+        if (staffMessageList == null || staffMessageList.isEmpty()) {
+            reporter.sendMessage(new TextComponent(ChatColor.RED + "Staff alert message not found in configuration."));
+            return;
+        }
+
+        // Costruisce il messaggio sostituendo i placeholder in ogni riga
+        StringBuilder staffMessageBuilder = new StringBuilder();
+        for (String line : staffMessageList) {
+            String formattedLine = ChatColor.translateAlternateColorCodes('&', line
+                    .replace("{player}", reporter.getName())
+                    .replace("{reportedPlayer}", reportedPlayer)
+                    .replace("{reason}", reason)
+                    .replace("{server}", server));
+            staffMessageBuilder.append(formattedLine).append("\n");
+        }
+
+        // Converte il messaggio in un componente testuale
+        TextComponent messageComponent = new TextComponent(staffMessageBuilder.toString());
 
         for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
             if (staffMember.hasPermission("report.mcreport")) {
-                TextComponent messageComponent = new TextComponent(ChatColor.translateAlternateColorCodes('&', staffMessage));
 
                 // Aggiungi una linea di separazione prima dei bottoni
                 messageComponent.addExtra(new TextComponent("\n"));
@@ -86,7 +102,6 @@ public class StaffNotifier {
             }
         }
     }
-
 
     // Questo metodo viene eseguito quando lo staff clicca sul bottone di teletrasporto
     public void teleportToPlayer(ProxiedPlayer staffMember, String reportedPlayer, String server) {

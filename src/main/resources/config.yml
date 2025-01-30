@@ -13,9 +13,9 @@ discord:
   title: ":hammer_pick: ReportDiscordPlus :hammer_pick:"
   embedColor: 65280 # Color RGB format
   fields:
-    reporter: "Segnalatore"
-    reported: "Segnalato"
-    reason: "Motivo"
+    reporter: "Reporter"
+    reported: "Reported"
+    reason: "Reason"
     server: "Server"
 
 # Report cooldown time in seconds
@@ -36,7 +36,6 @@ messages:
   reportSent: "&6&lReport&7&lDSPL &aYour report has been sent successfully!"
   noPermission: "&6&lReport&7&lDSPL &cYou do not have permission to run this command."
   consoleCommand: "&6&lReport&7&lDSPL &cThis command can only be performed by a player."
-  staffAlert: "&6&lReport&7&lDSPL &6&lNew report available!&r &6Player: &9{player} &6- Reported Player: &9{reportedPlayer} &6- Reason: &9{reason} &6- Server: &9{server}"
   myself: "&6&lReport&7&lDSPL &cYou cannot report yourself!"
   usageClose: "&cUsage: /rpclose close <id>"
   usageReopen: "&cUsage: /rpreopen reopen <id>"
@@ -52,7 +51,12 @@ messages:
   openReportsMessage: "&aThere are {amount} reports open."
   reasonTooShort: "&cThe reason must contain at least {min} characters."
   reasonTooLong: "&cThe reason cannot exceed {max} characters."
-
+  staffAlert:
+    - "&6&lReport&7&lDSPL &6&lNew report available!"
+    - "&6Player: &9{player}"
+    - "&6- Reported Player: &9{reportedPlayer}"
+    - "&6- Reason: &9{reason}"
+    - "&6- Server: &9{server}"
 
 title: "&6&lNEW REPORT FROM {player}"
 subtitle: "&9{reportedPlayer} has been reported for {reason} on {server}"
