@@ -109,7 +109,11 @@ public class ReportCommand implements SimpleCommand {
         String server = player.getCurrentServer().get().getServerInfo().getName();
 
         plugin.getDiscordNotifier().sendReportToDiscord(reporter, reportedPlayer.getUsername(), reason, server);
-        plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reportedPlayer.getUsername(), reason, server);
+        try {
+            plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reportedPlayer.getUsername(), reason, server);
+        } catch (SerializationException e) {
+            throw new RuntimeException(e);
+        }
         try {
             saveReportToYAML(reporter, reportedPlayer.getUsername(), reason, server);
         } catch (SerializationException e) {
