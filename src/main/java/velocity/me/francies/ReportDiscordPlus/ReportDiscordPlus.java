@@ -105,7 +105,7 @@ public class ReportDiscordPlus {
         // Avvia il controllo degli aggiornamenti
         checkForUpdates();
         String version = messageManager.getRawMessage("config_version");
-        if (!version.equalsIgnoreCase("3")) {
+        if (!version.equalsIgnoreCase("4")) {
             logger.error("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
     }
