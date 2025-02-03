@@ -7,7 +7,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import velocity.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 import velocity.me.francies.ReportDiscordPlus.utility.MessageManager;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class ReportDeleteCommand implements SimpleCommand {
     @Override
     public void execute(Invocation invocation) {
         if (!(invocation.source() instanceof Player)) {
-            invocation.source().sendMessage(Component.text("Only player can do this command."));
+            invocation.source().sendMessage(Component.text("Only players can execute this command."));
             return;
         }
 
@@ -37,13 +36,22 @@ public class ReportDeleteCommand implements SimpleCommand {
             return;
         }
 
-        if (args.length < 1) {
+        // Controllo che ci siano almeno 2 argomenti: "/rpdelete delete <id>"
+        if (args.length < 2) {
             Component usageMessage = messageManager.getComponentMessage("messages.usageDelete", null);
             sender.sendMessage(usageMessage);
             return;
         }
 
-        String reportId = args[0];
+        // Ora "delete" deve essere il primo argomento
+        if (!args[0].equalsIgnoreCase("delete")) {
+            Component usageMessage = messageManager.getComponentMessage("messages.usageDelete", null);
+            sender.sendMessage(usageMessage);
+            return;
+        }
+
+        // Il vero ID è args[1]
+        String reportId = args[1];
 
         if (plugin.getReportsConfig().node("reports", reportId).virtual()) {
             Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", null);
@@ -63,6 +71,5 @@ public class ReportDeleteCommand implements SimpleCommand {
 
         Component deleteMessage = messageManager.getComponentMessage("messages.reportDeleted", placeholders);
         sender.sendMessage(deleteMessage);
-
     }
 }

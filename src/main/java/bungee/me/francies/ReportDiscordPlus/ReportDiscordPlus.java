@@ -77,7 +77,6 @@ public class ReportDiscordPlus extends Plugin {
         getProxy().getPluginManager().registerCommand(this, new ReportReopenCommand(this));
         getProxy().getPluginManager().registerCommand(this, new ReportDeleteCommand(this));
         getProxy().getPluginManager().registerListener(this, new PlayerJoinListenerReports(this));
-        getProxy().getPluginManager().registerListener(this, new TabCompletionListener(this));
         String version = getConfig().getString("config_version");
         if (!version.equalsIgnoreCase("5")) {
             getLogger().severe("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");

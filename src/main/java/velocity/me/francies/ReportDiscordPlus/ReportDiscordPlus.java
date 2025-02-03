@@ -32,10 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "6.7", authors = {"Francies"})
+@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "7.0.0", authors = {"Francies"})
 public class ReportDiscordPlus {
     private final Path dataDirectory;
-    private static final String ENCODED_KEYS_URL = "aHR0cHM6Ly93d3cuZnJhbmNlc2NvZmVycmFyYS5pdC9hcGkva2V5cy5qc29u";
     private final Map<String, Long> cooldowns = new HashMap<>();
     private final ProxyServer server;
     private final Logger logger;
@@ -75,7 +74,7 @@ public class ReportDiscordPlus {
 
         // Registra comandi ed eventi
         server.getEventManager().register(this, new PlayerLoginListener(this, server, messageManager));
-        //server.getCommandManager().register("verifyreport", new VerifyReportCommand(this, messageManager));
+        // TODO server.getCommandManager().register("verifyreport", new VerifyReportCommand(this, messageManager));
         server.getCommandManager().register("report", new ReportCommand(this, messageManager));
         server.getCommandManager().register("reports", new ReportListCommand(this, messageManager));
         server.getCommandManager().register("rpclose", new ReportCloseCommand(this, messageManager));
@@ -254,7 +253,7 @@ public class ReportDiscordPlus {
                 String downloadUrl1 = json.get("downloadUrl1").getAsString();
 
                 // Ottieni la versione attuale (del proxy o del plugin, a seconda di ciò che ti serve)
-                String currentVersion = getProxy().getVersion().getVersion();
+                String currentVersion = "7.0.0";
 
                 // Se la versione è diversa, notifica gli admin
                 if (!currentVersion.equals(latestVersion)) {

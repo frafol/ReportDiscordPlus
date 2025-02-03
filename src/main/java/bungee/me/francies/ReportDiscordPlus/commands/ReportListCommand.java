@@ -35,7 +35,7 @@ public class ReportListCommand extends Command {
                     try {
                         page = Integer.parseInt(args[0]);
                     } catch (NumberFormatException e) {
-                        sender.sendMessage(new TextComponent(plugin.getMessage("invalidPageNumber")));
+                        sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("invalidPageNumber")));
                         return;
                     }
                 }
@@ -49,19 +49,19 @@ public class ReportListCommand extends Command {
                     } else if (args[0].equalsIgnoreCase("opened")) {
                         statusFilter = "open";
                     } else {
-                        sender.sendMessage(new TextComponent(plugin.getMessage("invalidPageNumber")));
+                        sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("invalidPageNumber")));
                         return;
                     }
 
                 } catch (NumberFormatException e) {
-                    sender.sendMessage(new TextComponent(plugin.getMessage("invalidPageNumber")));
+                    sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("invalidPageNumber")));
                     return;
                 }
             }
 
             listReports((ProxiedPlayer) sender, page, statusFilter);
         } else {
-            sender.sendMessage(new TextComponent(plugin.getMessage("noPermission")));
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("noPermission")));
         }
     }
 

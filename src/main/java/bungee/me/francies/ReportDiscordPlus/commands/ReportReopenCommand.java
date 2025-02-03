@@ -4,6 +4,7 @@ import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,15 +19,23 @@ public class ReportReopenCommand extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if(!sender.hasPermission("report.admin")){
-            sender.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("noPermission"));
+        if (!sender.hasPermission("report.admin")) {
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("noPermission")));
             return;
         }
+
+        // Controllo che ci siano almeno 2 argomenti (sub-comando "reopen" e l'ID)
         if (args.length < 2) {
-            // Messaggio di errore se gli argomenti non sono sufficienti
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("usageReopen")));  // Puoi configurare il messaggio "usageClose" nel tuo file di configurazione
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageReopen")));
             return;
         }
+
+        // Controllo che il primo argomento sia "reopen"
+        if (!args[0].equalsIgnoreCase("reopen")) {
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageReopen")));
+            return;
+        }
+
         String reportId = args[1];
 
         // Verifica che il report esista
@@ -34,17 +43,22 @@ public class ReportReopenCommand extends Command {
             plugin.getReportsConfig().set("reports." + reportId + ".status", "open");
             plugin.getReportsConfig().set("reports." + reportId + ".closed_by", null);
             plugin.getReportsConfig().set("reports." + reportId + ".closed_timestamp", null);
-
-            // Salva le modifiche nel file YAML
             plugin.saveReportsConfig();
 
+            // Sostituzione placeholder
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("id", reportId);
 
-            String reopenMessage = plugin.getConfig().getString("messages.reportReopened", "&aReport {id} riaperto con successo.");
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.replacePlaceholders(reopenMessage, placeholders)));
+            String reopenMessage = plugin.getConfig().getString("messages.reportReopened");
+            reopenMessage = plugin.replacePlaceholders(reopenMessage, placeholders);
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + reopenMessage));
         } else {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("reportNotFound")));
+            Map<String, String> placeholders = new HashMap<>();
+            placeholders.put("id", reportId);
+
+            String notFoundMessage = plugin.getMessage("reportNotFound");
+            notFoundMessage = plugin.replacePlaceholders(notFoundMessage, placeholders);
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + notFoundMessage));
         }
     }
 }

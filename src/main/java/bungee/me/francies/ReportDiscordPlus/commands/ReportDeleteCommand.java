@@ -4,6 +4,7 @@ import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,32 +19,45 @@ public class ReportDeleteCommand extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if(!sender.hasPermission("report.admin")){
-            sender.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("noPermission"));
+        if (!sender.hasPermission("report.admin")) {
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("noPermission")));
             return;
         }
+
+        // Controllo che ci siano almeno 2 argomenti (sub-comando "delete" e l'ID)
         if (args.length < 2) {
-            // Messaggio di errore se gli argomenti non sono sufficienti
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("usageDelete")));  // Puoi configurare il messaggio "usageClose" nel tuo file di configurazione
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageDelete")));
             return;
         }
+
+        // Controllo che il primo argomento sia "delete"
+        if (!args[0].equalsIgnoreCase("delete")) {
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageDelete")));
+            return;
+        }
+
         String reportId = args[1];
 
         // Verifica che il report esista
         if (plugin.getReportsConfig().contains("reports." + reportId)) {
             // Rimuove il report dal file YAML
             plugin.getReportsConfig().set("reports." + reportId, null);
-
-            // Salva le modifiche nel file YAML
             plugin.saveReportsConfig();
 
+            // Sostituzione placeholder
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("id", reportId);
 
-            String deleteMessage = plugin.getConfig().getString("messages.reportDeleted", "&aReport {id} cancellato con successo.");
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.replacePlaceholders(deleteMessage, placeholders)));
+            String deleteMessage = plugin.getConfig().getString("messages.reportDeleted");
+            deleteMessage = plugin.replacePlaceholders(deleteMessage, placeholders);
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + deleteMessage));
         } else {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("reportNotFound")));
+            Map<String, String> placeholders = new HashMap<>();
+            placeholders.put("id", reportId);
+
+            String notFoundMessage = plugin.getMessage("reportNotFound");
+            notFoundMessage = plugin.replacePlaceholders(notFoundMessage, placeholders);
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + notFoundMessage));
         }
     }
 }

@@ -35,7 +35,7 @@ public class StaffNotifier {
         }
 
         // Recupera il messaggio staffAlert come lista di stringhe
-        List<String> staffMessageList = plugin.getConfig().getStringList("staffAlert");
+        List<String> staffMessageList = plugin.getConfig().getStringList("messages.staffAlert");
 
         // Se la lista è vuota o nulla, evita errori
         if (staffMessageList == null || staffMessageList.isEmpty()) {

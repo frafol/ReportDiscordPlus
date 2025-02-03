@@ -7,7 +7,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import velocity.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 import velocity.me.francies.ReportDiscordPlus.utility.MessageManager;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,31 +30,39 @@ public class ReportCloseCommand implements SimpleCommand {
         Player sender = (Player) invocation.source();
         String[] args = invocation.arguments();
 
+        // Controllo permessi
         if (!sender.hasPermission("report.admin")) {
             Component noPermissionMessage = messageManager.getComponentMessage("messages.noPermission", null);
             sender.sendMessage(noPermissionMessage);
             return;
         }
 
-        if (args.length < 1) {
+        // Controllo che almeno i primi 2 argomenti ci siano, es: /rpclose close <id>
+        if (args.length < 2) {
             Component usageMessage = messageManager.getComponentMessage("messages.usageClose", null);
-            sender.sendMessage(usageMessage);
-            return;
-        } else if (args.length < 2) {
-            Component usageMessage = messageManager.getComponentMessage("messages.missingID", null);
             sender.sendMessage(usageMessage);
             return;
         }
 
-        String reportId = args[0];
+        // args[0] dovrebbe essere "close"
+        if (!args[0].equalsIgnoreCase("close")) {
+            // Messaggio d’uso se non è "close"
+            Component usageMessage = messageManager.getComponentMessage("messages.usageClose", null);
+            sender.sendMessage(usageMessage);
+            return;
+        }
 
+        // Il vero ID sarà args[1]
+        String reportId = args[1];
+
+        // Verifico se il nodo "reports.<reportId>" non esiste
         if (plugin.getReportsConfig().node("reports", reportId).virtual()) {
             Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", null);
             sender.sendMessage(notFoundMessage);
             return;
         }
 
-        // Aggiorna lo stato del report a "closed"
+        // Imposto lo stato a "closed"
         try {
             plugin.getReportsConfig().node("reports", reportId, "status").set("closed");
             plugin.getReportsConfig().node("reports", reportId, "closed_by").set(sender.getUsername());
@@ -64,8 +71,10 @@ public class ReportCloseCommand implements SimpleCommand {
             throw new RuntimeException(e);
         }
 
+        // Salvo il config
         plugin.saveReportsConfig();
 
+        // Invio il messaggio di conferma al player
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("id", reportId);
         Component closeMessage = messageManager.getComponentMessage("messages.reportClosed", placeholders);

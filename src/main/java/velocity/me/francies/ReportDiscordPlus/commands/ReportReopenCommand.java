@@ -8,7 +8,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import velocity.me.francies.ReportDiscordPlus.ReportDiscordPlus;
 import velocity.me.francies.ReportDiscordPlus.utility.MessageManager;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ public class ReportReopenCommand implements SimpleCommand {
 
     @Override
     public void execute(Invocation invocation) {
+        // Controllo che il comando sia eseguito da un Player
         if (!(invocation.source() instanceof Player)) {
             invocation.source().sendMessage(Component.text("Only player can do this command."));
             return;
@@ -32,20 +32,31 @@ public class ReportReopenCommand implements SimpleCommand {
         Player sender = (Player) invocation.source();
         String[] args = invocation.arguments();
 
+        // Controllo permessi
         if (!sender.hasPermission("report.admin")) {
             Component noPermissionMessage = messageManager.getComponentMessage("messages.noPermission", null);
             sender.sendMessage(noPermissionMessage);
             return;
         }
 
-        if (args.length < 1) {
+        // Per /rpreopen reopen <id> servono almeno 2 argomenti
+        if (args.length < 2) {
             Component usageMessage = messageManager.getComponentMessage("messages.usageReopen", null);
             sender.sendMessage(usageMessage);
             return;
         }
 
-        String reportId = args[0];
+        // Il primo argomento deve essere "reopen"
+        if (!args[0].equalsIgnoreCase("reopen")) {
+            Component usageMessage = messageManager.getComponentMessage("messages.usageReopen", null);
+            sender.sendMessage(usageMessage);
+            return;
+        }
 
+        // Il secondo argomento è l'ID del report
+        String reportId = args[1];
+
+        // Cerco il nodo corrispondente al report
         ConfigurationNode reportsNode = plugin.getReportsConfig().node("reports", reportId);
         if (reportsNode.virtual()) {
             Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", null);
@@ -53,7 +64,7 @@ public class ReportReopenCommand implements SimpleCommand {
             return;
         }
 
-        // Riapri il report e aggiorna lo stato
+        // Riapro il report e azzero i campi di chiusura
         try {
             reportsNode.node("status").set("open");
             reportsNode.node("closed_by").set(null);
@@ -62,13 +73,14 @@ public class ReportReopenCommand implements SimpleCommand {
             throw new RuntimeException(e);
         }
 
+        // Salvo il file di configurazione
         plugin.saveReportsConfig();
 
+        // Messaggio di conferma con placeholder
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("id", reportId);
 
         Component reopenMessage = messageManager.getComponentMessage("messages.reportReopened", placeholders);
         sender.sendMessage(reopenMessage);
-
     }
 }
