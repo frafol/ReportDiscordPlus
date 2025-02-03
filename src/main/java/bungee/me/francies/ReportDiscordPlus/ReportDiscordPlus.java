@@ -21,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -76,7 +77,7 @@ public class ReportDiscordPlus extends Plugin {
         getProxy().getPluginManager().registerCommand(this, new ReportReopenCommand(this));
         getProxy().getPluginManager().registerCommand(this, new ReportDeleteCommand(this));
         getProxy().getPluginManager().registerListener(this, new PlayerJoinListenerReports(this));
-        String version = getConfigMessage("config_version");
+        String version = getConfig().getString("config_version");
         if (!version.equalsIgnoreCase("4")) {
             getLogger().severe("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
@@ -147,6 +148,7 @@ public class ReportDiscordPlus extends Plugin {
     public Configuration getReportsConfig() {
         return reportsConfig;
     }
+
     private void loadConfig() throws IOException {
         if (!getDataFolder().exists())
             getDataFolder().mkdir();
@@ -209,58 +211,4 @@ public class ReportDiscordPlus extends Plugin {
         return staffNotifier;
     }
 
-    public void checkForUpdates() {
-        try {
-            URL url = new URL(versionUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder content = new StringBuilder();
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-
-            in.close();
-            connection.disconnect();
-
-            JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
-            String latestVersion = json.get("version").getAsString();
-            String downloadUrl1 = json.get("downloadUrl1").getAsString();
-
-            String currentVersion = this.getDescription().getVersion();
-
-            if (!currentVersion.equals(latestVersion)) {
-
-                List<String> updateMessages = getConfig().getStringList("updateMessage");
-
-                if (updateMessages != null && !updateMessages.isEmpty()) {
-
-                    for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
-                        if (staffMember.hasPermission("report.admin")) {
-                            for (String line : updateMessages) {
-                                String formattedMessage = ChatColor.translateAlternateColorCodes('&',
-                                        line.replace("{currentVersion}", currentVersion)
-                                                .replace("{latestVersion}", latestVersion)
-                                                .replace("{downloadUrl}", downloadUrl1));
-                                staffMember.sendMessage(new TextComponent(formattedMessage));
-                            }
-                        }
-                    }
-                } else {
-
-                    ProxyServer.getInstance().getLogger().warning("updatedMessage is not configured properly.");
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private String getConfigMessage(String path) {
-        return getConfig().getString(path, "Message not found in config: " + path);
-    }
 }

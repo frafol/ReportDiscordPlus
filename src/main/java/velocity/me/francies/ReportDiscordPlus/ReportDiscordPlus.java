@@ -9,6 +9,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -62,26 +63,6 @@ public class ReportDiscordPlus {
         loadReportsConfig();
         loadReasonLengthLimits();
         this.messageManager = new MessageManager(config);
-//        try {
-//            // Verifica e genera file.key
-//            File keyFile = new File(dataDirectory.toFile(), "file.key");
-//            String localId;
-//
-//            if (!keyFile.exists()) {
-//                localId = UUID.randomUUID().toString();
-//                saveKeyFile(localId);
-//            } else {
-//                localId = readKeyFile();
-//            }
-//
-//            String key = config.node("licenseKey").getString("");
-//            if (!verifyKey(key, localId)) {
-//                logger.error("Wait, an id should be set to your plugin soon");
-//                return;
-//            }
-//        } catch (IOException e) {
-//            logger.error("Error during plugin initialization: " + e.getMessage());
-//        }
 
         Metrics metrics = metricsFactory.make(this, 23259);
         metrics.addCustomChart(new Metrics.SingleLineChart("chart_id", () -> Integer.valueOf("value")));
@@ -194,59 +175,7 @@ public class ReportDiscordPlus {
         return newReportId;
     }
 
-//    private void saveKeyFile(String id) throws IOException {
-//        File keyFile = new File(dataDirectory.toFile(), "file.key");
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter(keyFile))) {
-//            writer.write(id);
-//        }
-//    }
-//
-//    private String readKeyFile() throws IOException {
-//        File keyFile = new File(dataDirectory.toFile(), "file.key");
-//        return new String(Files.readAllBytes(keyFile.toPath()));
-//    }
 
-//    public boolean verifyKey(String key, String localId) {
-//        try {
-//            String keysUrl = new String(Base64.getDecoder().decode(ENCODED_KEYS_URL));
-//
-//            HttpURLConnection connection = (HttpURLConnection) new URL(keysUrl).openConnection();
-//            connection.setRequestMethod("GET");
-//
-//            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//            StringBuilder content = new StringBuilder();
-//            String inputLine;
-//            while ((inputLine = in.readLine()) != null) {
-//                content.append(inputLine);
-//            }
-//            in.close();
-//            connection.disconnect();
-//
-//            JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
-//
-//            if (!json.has(key)) {
-//                logger.error("KEY NOT FOUND. IF YOU PURCHASED THE PLUGIN OPEN A TICKET HERE: https://discord.gg/SGtHSCTaEX");
-//                return false;
-//            }
-//
-//            String registeredId = json.get(key).getAsJsonObject().get("id").getAsString();
-//
-//            if (registeredId.isEmpty()) {
-//                logger.error("ID is missing for the key. Sending to Discord...");
-//                sendKeyToDiscord(key, localId);
-//                return false;
-//            } else if (registeredId.equals(localId)) {
-//                return true;
-//            } else {
-//                logger.error("KEY ALREADY IN USE WITH A DIFFERENT ID");
-//                return false;
-//            }
-//
-//        } catch (IOException e) {
-//            logger.error("Error during key verification: " + e.getMessage());
-//            return false;
-//        }
-//    }
 
     public boolean isPlayerInBlacklist(Player player) {
         return player.hasPermission("report.protection");
@@ -283,54 +212,13 @@ public class ReportDiscordPlus {
     public boolean hasCooldown(Player player) {
         return this.cooldowns.containsKey(player.getUsername()) && this.cooldowns.get(player.getUsername()) > System.currentTimeMillis();
     }
-//    private void sendKeyToDiscord(String key, String localId) {
-//        try {
-//            // URL del tuo webhook di Discord
-//            String webhookUrl = "https://discord.com/api/webhooks/1294797101863145553/IcT4GnnWeQKHVEb-IivqVCngxrIs8CK3jg1zQjFrv6rVhl6KbRiE0aGtLK7T42YVjhWS";
-//
-//            // Corpo del messaggio da inviare
-//            String message = "{"
-//                    + "\"content\": \"<@&1146046554348724296> Devi assegnare questo id\","
-//                    + "\"embeds\": [{"
-//                    + "\"title\": \"Assegnazione key\","
-//                    + "\"description\": \"Generato un id nuovo:\","
-//                    + "\"fields\": ["
-//                    + "{ \"name\": \"Key\", \"value\": \"" + key + "\" },"
-//                    + "{ \"name\": \"ID\", \"value\": \"" + localId + "\" }"
-//                    + "],"
-//                    + "\"color\": 5814783"
-//                    + "}]"
-//                    + "}";
-//
-//            // Creazione della connessione
-//            URL url = new URL(webhookUrl);
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//            connection.setRequestMethod("POST");
-//            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-//            connection.setDoOutput(true);
-//
-//            // Invia il messaggio JSON al webhook
-//            try (OutputStream os = connection.getOutputStream()) {
-//                byte[] input = message.getBytes("utf-8");
-//                os.write(input, 0, input.length);
-//            }
-//
-//            // Leggi la risposta dal server
-//            int responseCode = connection.getResponseCode();
-//            if (responseCode == HttpURLConnection.HTTP_NO_CONTENT || responseCode == HttpURLConnection.HTTP_OK) {
-//                logger.info("Key and ID successfully sent to Discord.");
-//            } else {
-//                logger.error("Failed to send key and ID to Discord. Response code: " + responseCode);
-//            }
-//        } catch (IOException e) {
-//            logger.error("Error during Discord webhook communication: " + e.getMessage());
-//        }
-//    }
+
 
     public ConfigurationNode getReportsConfig() {
         return reportsConfig;
     }
     public void checkForUpdates() {
+        // Avvia un task asincrono con un leggero ritardo
         server.getScheduler().buildTask(this, () -> {
             try {
                 // Connessione per ottenere le informazioni sulla versione
@@ -353,42 +241,47 @@ public class ReportDiscordPlus {
                 String latestVersion = json.get("version").getAsString();
                 String downloadUrl1 = json.get("downloadUrl1").getAsString();
 
-                // Ottieni la versione attuale del plugin
+                // Ottieni la versione attuale (del proxy o del plugin, a seconda di ciò che ti serve)
                 String currentVersion = getProxy().getVersion().getVersion();
 
-                // Controllo se è necessaria un'update
+                // Se la versione è diversa, notifica gli admin
                 if (!currentVersion.equals(latestVersion)) {
-                    // Preparazione dei segnaposto
+                    // Prepara i placeholder
                     Map<String, String> placeholders = Map.of(
                             "currentVersion", currentVersion,
                             "latestVersion", latestVersion,
                             "downloadUrl", downloadUrl1
                     );
 
-                    // Leggi la lista di messaggi dalla configurazione
+                    // Carica la lista di messaggi dalla config
                     List<String> updateMessages = messageManager.getRawMessageList("updateMessage");
 
                     if (updateMessages != null && !updateMessages.isEmpty()) {
-                        // Invio dei messaggi di aggiornamento agli admin
+                        // Invia i messaggi di aggiornamento agli staff con permesso "report.admin"
                         for (Player staffMember : server.getAllPlayers()) {
                             if (staffMember.hasPermission("report.admin")) {
                                 for (String line : updateMessages) {
+                                    // Sostituisci i placeholder nel messaggio
                                     String formattedLine = messageManager.replacePlaceholders(line, placeholders);
-                                    staffMember.sendMessage(messageManager.deserializeMessage(formattedLine));
+
+                                    // Deserializziamo in componente Adventure
+                                    Component messageComponent = messageManager.deserializeMessage(formattedLine);
+
+                                    // Aggiungiamo l’evento di click per aprire il link
+                                    messageComponent = messageComponent.clickEvent(ClickEvent.openUrl(downloadUrl1));
+
+                                    // Invio del messaggio al giocatore
+                                    staffMember.sendMessage(messageComponent);
                                 }
                             }
                         }
                     } else {
-
-                        logger.warn("updateMessage have not been set properly.");
+                        logger.warn("updateMessage non è configurato correttamente nel file di configurazione.");
                     }
                 }
-
             } catch (Exception e) {
-                logger.error("Error during the update check: ", e);
+                logger.error("Errore durante il controllo aggiornamenti: ", e);
             }
         }).delay(10, TimeUnit.SECONDS).schedule();
     }
-
-
 }
