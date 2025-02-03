@@ -67,7 +67,6 @@ public class ReportCommand extends Command {
                     return;
                 }
 
-
                 if (plugin.isPlayerInBlacklist(reportedPlayer)) {
                     player.sendMessage(plugin.getMessage("cannotReportPlayer"));
                     return;
