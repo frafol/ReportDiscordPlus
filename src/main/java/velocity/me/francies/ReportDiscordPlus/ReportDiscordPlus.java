@@ -80,18 +80,7 @@ public class ReportDiscordPlus {
         server.getCommandManager().register("rpclose", new ReportCloseCommand(this, messageManager));
         server.getCommandManager().register("rpreopen", new ReportReopenCommand(this, messageManager));
         server.getCommandManager().register("rpdelete", new ReportDeleteCommand(this, messageManager));
-        server.getCommandManager().register(
-                "rpclose",
-                new TabCompletionListener(this)
-        );
-        server.getCommandManager().register(
-                "rpdelete",
-                new TabCompletionListener(this)
-        );
-        server.getCommandManager().register(
-                "rpreopen",
-                new TabCompletionListener(this)
-        );
+
         server.getEventManager().register(this, new PlayerJoinListenerReports(this, messageManager));
 
         // Avvia il controllo degli aggiornamenti
