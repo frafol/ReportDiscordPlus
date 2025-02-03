@@ -55,11 +55,13 @@ public class ReportReopenCommand implements SimpleCommand {
 
         // Il secondo argomento è l'ID del report
         String reportId = args[1];
-
+// Messaggio di conferma con placeholder
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("id", reportId);
         // Cerco il nodo corrispondente al report
         ConfigurationNode reportsNode = plugin.getReportsConfig().node("reports", reportId);
         if (reportsNode.virtual()) {
-            Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", null);
+            Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", placeholders);
             sender.sendMessage(notFoundMessage);
             return;
         }
@@ -76,9 +78,7 @@ public class ReportReopenCommand implements SimpleCommand {
         // Salvo il file di configurazione
         plugin.saveReportsConfig();
 
-        // Messaggio di conferma con placeholder
-        Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("id", reportId);
+
 
         Component reopenMessage = messageManager.getComponentMessage("messages.reportReopened", placeholders);
         sender.sendMessage(reopenMessage);

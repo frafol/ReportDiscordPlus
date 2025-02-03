@@ -7,7 +7,6 @@ import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MessageManager {
 
@@ -46,20 +45,6 @@ public class MessageManager {
         }
 
         return componentMessage;
-    }
-
-    public List<String> getMessageList(String path, Map<String, String> placeholders) throws SerializationException {
-        List<String> messages = getRawMessageList(path);
-        return messages.stream()
-                .map(message -> replacePlaceholders(message, placeholders))
-                .collect(Collectors.toList());
-    }
-
-    public List<Component> getComponentMessageList(String path, Map<String, String> placeholders) throws SerializationException {
-        List<String> messages = getMessageList(path, placeholders);
-        return messages.stream()
-                .map(LegacyComponentSerializer.legacyAmpersand()::deserialize)
-                .collect(Collectors.toList());
     }
 
     public String replacePlaceholders(String message, Map<String, String> placeholders) {

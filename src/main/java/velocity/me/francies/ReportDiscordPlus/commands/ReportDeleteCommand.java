@@ -52,9 +52,11 @@ public class ReportDeleteCommand implements SimpleCommand {
 
         // Il vero ID è args[1]
         String reportId = args[1];
-
+        // Invio il messaggio di conferma al player
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("id", reportId);
         if (plugin.getReportsConfig().node("reports", reportId).virtual()) {
-            Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", null);
+            Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", placeholders);
             sender.sendMessage(notFoundMessage);
             return;
         }
@@ -65,9 +67,6 @@ public class ReportDeleteCommand implements SimpleCommand {
             throw new RuntimeException(e);
         }
         plugin.saveReportsConfig();
-
-        Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("id", reportId);
 
         Component deleteMessage = messageManager.getComponentMessage("messages.reportDeleted", placeholders);
         sender.sendMessage(deleteMessage);

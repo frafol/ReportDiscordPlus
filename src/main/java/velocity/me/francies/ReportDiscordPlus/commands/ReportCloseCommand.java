@@ -54,10 +54,12 @@ public class ReportCloseCommand implements SimpleCommand {
 
         // Il vero ID sarà args[1]
         String reportId = args[1];
-
+        // Invio il messaggio di conferma al player
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("id", reportId);
         // Verifico se il nodo "reports.<reportId>" non esiste
         if (plugin.getReportsConfig().node("reports", reportId).virtual()) {
-            Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", null);
+            Component notFoundMessage = messageManager.getComponentMessage("messages.reportNotFound", placeholders);
             sender.sendMessage(notFoundMessage);
             return;
         }
@@ -74,9 +76,7 @@ public class ReportCloseCommand implements SimpleCommand {
         // Salvo il config
         plugin.saveReportsConfig();
 
-        // Invio il messaggio di conferma al player
-        Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("id", reportId);
+
         Component closeMessage = messageManager.getComponentMessage("messages.reportClosed", placeholders);
         sender.sendMessage(closeMessage);
     }
