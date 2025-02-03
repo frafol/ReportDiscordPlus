@@ -77,8 +77,9 @@ public class ReportDiscordPlus extends Plugin {
         getProxy().getPluginManager().registerCommand(this, new ReportReopenCommand(this));
         getProxy().getPluginManager().registerCommand(this, new ReportDeleteCommand(this));
         getProxy().getPluginManager().registerListener(this, new PlayerJoinListenerReports(this));
+        getProxy().getPluginManager().registerListener(this, new TabCompletionListener(this));
         String version = getConfig().getString("config_version");
-        if (!version.equalsIgnoreCase("4")) {
+        if (!version.equalsIgnoreCase("5")) {
             getLogger().severe("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
 
@@ -210,5 +211,65 @@ public class ReportDiscordPlus extends Plugin {
     public StaffNotifier getStaffNotifier() {
         return staffNotifier;
     }
+    public void checkForUpdates() {
+        try {
+            URL url = new URL(versionUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
 
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder content = new StringBuilder();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            connection.disconnect();
+
+            // Parsing della risposta JSON
+            JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
+            String latestVersion = json.get("version").getAsString();
+            String downloadUrl1 = json.get("downloadUrl1").getAsString();
+
+            // Ottieni la versione attuale del plugin
+            String currentVersion = this.getDescription().getVersion();
+
+            // Controllo se è necessaria un'update
+            if (!currentVersion.equals(latestVersion)) {
+                // Leggi la lista di messaggi dalla configurazione
+                List<String> updateMessages = getConfig().getStringList("updateMessage");
+
+                if (updateMessages != null && !updateMessages.isEmpty()) {
+                    // Invio dei messaggi di aggiornamento agli admin
+                    for (ProxiedPlayer staffMember : ProxyServer.getInstance().getPlayers()) {
+                        if (staffMember.hasPermission("report.admin")) {
+                            for (String line : updateMessages) {
+                                // Sostituiamo i placeholder
+                                String formattedMessage = ChatColor.translateAlternateColorCodes('&',
+                                        line.replace("{currentVersion}", currentVersion)
+                                                .replace("{latestVersion}", latestVersion)
+                                                .replace("{downloadUrl}", downloadUrl1)
+                                );
+
+                                // Creiamo una TextComponent da stringa legacy
+                                TextComponent textComponent = new TextComponent(TextComponent.fromLegacyText(formattedMessage));
+
+                                // Impostiamo un evento cliccabile sul link
+                                textComponent.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, downloadUrl1));
+
+                                // Mandiamo il messaggio al giocatore
+                                staffMember.sendMessage(textComponent);
+                            }
+                        }
+                    }
+                } else {
+                    ProxyServer.getInstance().getLogger().warning("updateMessage non è configurato correttamente.");
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
+

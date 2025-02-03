@@ -19,12 +19,12 @@ public class ReportReopenCommand extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if(!sender.hasPermission("report.admin")){
-            sender.sendMessage(plugin.getMessage("noPermission"));
+            sender.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("noPermission"));
             return;
         }
         if (args.length < 2) {
             // Messaggio di errore se gli argomenti non sono sufficienti
-            sender.sendMessage(new TextComponent(plugin.getMessage("usageReopen")));  // Puoi configurare il messaggio "usageClose" nel tuo file di configurazione
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("usageReopen")));  // Puoi configurare il messaggio "usageClose" nel tuo file di configurazione
             return;
         }
         String reportId = args[1];
@@ -42,9 +42,9 @@ public class ReportReopenCommand extends Command {
             placeholders.put("id", reportId);
 
             String reopenMessage = plugin.getConfig().getString("messages.reportReopened", "&aReport {id} riaperto con successo.");
-            sender.sendMessage(new TextComponent(plugin.replacePlaceholders(reopenMessage, placeholders)));
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.replacePlaceholders(reopenMessage, placeholders)));
         } else {
-            sender.sendMessage(new TextComponent(plugin.getMessage("reportNotFound")));
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("reportNotFound")));
         }
     }
 }

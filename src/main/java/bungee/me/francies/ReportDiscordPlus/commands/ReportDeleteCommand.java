@@ -19,12 +19,12 @@ public class ReportDeleteCommand extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if(!sender.hasPermission("report.admin")){
-            sender.sendMessage(plugin.getMessage("noPermission"));
+            sender.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("noPermission"));
             return;
         }
         if (args.length < 2) {
             // Messaggio di errore se gli argomenti non sono sufficienti
-            sender.sendMessage(new TextComponent(plugin.getMessage("usageDelete")));  // Puoi configurare il messaggio "usageClose" nel tuo file di configurazione
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("usageDelete")));  // Puoi configurare il messaggio "usageClose" nel tuo file di configurazione
             return;
         }
         String reportId = args[1];
@@ -41,9 +41,9 @@ public class ReportDeleteCommand extends Command {
             placeholders.put("id", reportId);
 
             String deleteMessage = plugin.getConfig().getString("messages.reportDeleted", "&aReport {id} cancellato con successo.");
-            sender.sendMessage(new TextComponent(plugin.replacePlaceholders(deleteMessage, placeholders)));
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.replacePlaceholders(deleteMessage, placeholders)));
         } else {
-            sender.sendMessage(new TextComponent(plugin.getMessage("reportNotFound")));
+            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("reportNotFound")));
         }
     }
 }

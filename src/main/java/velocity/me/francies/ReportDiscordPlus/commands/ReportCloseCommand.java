@@ -41,6 +41,10 @@ public class ReportCloseCommand implements SimpleCommand {
             Component usageMessage = messageManager.getComponentMessage("messages.usageClose", null);
             sender.sendMessage(usageMessage);
             return;
+        } else if (args.length < 2) {
+            Component usageMessage = messageManager.getComponentMessage("messages.missingID", null);
+            sender.sendMessage(usageMessage);
+            return;
         }
 
         String reportId = args[0];

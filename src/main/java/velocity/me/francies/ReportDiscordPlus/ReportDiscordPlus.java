@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "6.5", authors = {"Francies"})
+@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "6.7", authors = {"Francies"})
 public class ReportDiscordPlus {
     private final Path dataDirectory;
     private static final String ENCODED_KEYS_URL = "aHR0cHM6Ly93d3cuZnJhbmNlc2NvZmVycmFyYS5pdC9hcGkva2V5cy5qc29u";
@@ -78,15 +78,27 @@ public class ReportDiscordPlus {
         //server.getCommandManager().register("verifyreport", new VerifyReportCommand(this, messageManager));
         server.getCommandManager().register("report", new ReportCommand(this, messageManager));
         server.getCommandManager().register("reports", new ReportListCommand(this, messageManager));
-        server.getCommandManager().register("reportclose", new ReportCloseCommand(this, messageManager));
-        server.getCommandManager().register("reportreopen", new ReportReopenCommand(this, messageManager));
-        server.getCommandManager().register("reportdelete", new ReportDeleteCommand(this, messageManager));
+        server.getCommandManager().register("rpclose", new ReportCloseCommand(this, messageManager));
+        server.getCommandManager().register("rpreopen", new ReportReopenCommand(this, messageManager));
+        server.getCommandManager().register("rpdelete", new ReportDeleteCommand(this, messageManager));
+        server.getCommandManager().register(
+                "rpclose",
+                new TabCompletionListener(this)
+        );
+        server.getCommandManager().register(
+                "rpdelete",
+                new TabCompletionListener(this)
+        );
+        server.getCommandManager().register(
+                "rpreopen",
+                new TabCompletionListener(this)
+        );
         server.getEventManager().register(this, new PlayerJoinListenerReports(this, messageManager));
 
         // Avvia il controllo degli aggiornamenti
         checkForUpdates();
         String version = messageManager.getRawMessage("config_version");
-        if (!version.equalsIgnoreCase("4")) {
+        if (!version.equalsIgnoreCase("5")) {
             logger.error("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
     }

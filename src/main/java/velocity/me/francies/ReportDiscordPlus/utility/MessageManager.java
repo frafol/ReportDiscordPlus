@@ -12,9 +12,12 @@ import java.util.stream.Collectors;
 public class MessageManager {
 
     private final ConfigurationNode config;
+    private final Component prefix;
 
     public MessageManager(ConfigurationNode config) {
         this.config = config;
+        // Recuperiamo il prefisso una volta e lo convertiamo in un Component
+        this.prefix = LegacyComponentSerializer.legacyAmpersand().deserialize(getRawMessage("messages.prefix"));
     }
 
     public String getRawMessage(String path) {
@@ -28,26 +31,37 @@ public class MessageManager {
         }
         return replacePlaceholders(message, placeholders);
     }
+
     public List<String> getRawMessageList(String path) throws SerializationException {
         return config.node((Object[]) path.split("\\.")).getList(String.class, List.of());
     }
+
     public Component getComponentMessage(String path, Map<String, String> placeholders) {
         String message = getMessage(path, placeholders);
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(message);
+        Component componentMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(message);
+
+        // Applichiamo il prefisso solo se il path inizia con "messages."
+        if (path.startsWith("messages.") && !path.equals("messages.prefix")) {
+            return prefix.append(Component.space()).append(componentMessage);
+        }
+
+        return componentMessage;
     }
-    // Metodo per ottenere una lista di messaggi con segnaposto sostituiti
+
     public List<String> getMessageList(String path, Map<String, String> placeholders) throws SerializationException {
         List<String> messages = getRawMessageList(path);
         return messages.stream()
                 .map(message -> replacePlaceholders(message, placeholders))
                 .collect(Collectors.toList());
     }
+
     public List<Component> getComponentMessageList(String path, Map<String, String> placeholders) throws SerializationException {
         List<String> messages = getMessageList(path, placeholders);
         return messages.stream()
                 .map(LegacyComponentSerializer.legacyAmpersand()::deserialize)
                 .collect(Collectors.toList());
     }
+
     public String replacePlaceholders(String message, Map<String, String> placeholders) {
         if (message == null || placeholders == null) {
             return message != null ? message : "";

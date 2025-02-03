@@ -39,7 +39,7 @@ public class ReportCommand implements SimpleCommand {
         }
 
         if (args.length == 0) {
-            Component playerNotFoundMessage = messageManager.getComponentMessage("messages.playerNotFound", null);
+            Component playerNotFoundMessage = messageManager.getComponentMessage("messages.noPlayerMentioned", null);
             player.sendMessage(playerNotFoundMessage);
             return;
         }
@@ -48,7 +48,7 @@ public class ReportCommand implements SimpleCommand {
         Player reportedPlayer = plugin.getProxy().getPlayer(reportedPlayerName).orElse(null);
 
         if (reportedPlayer == null || !reportedPlayer.isActive()) {
-            Component onlinePlayerMessage = messageManager.getComponentMessage("messages.onlineplayer", null);
+            Component onlinePlayerMessage = messageManager.getComponentMessage("messages.onlinePlayer", null);
             player.sendMessage(onlinePlayerMessage);
             return;
         }

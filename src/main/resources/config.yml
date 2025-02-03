@@ -4,7 +4,7 @@
 #
 # These settings are very important for the plugin to work
 
-config_version: "3"
+config_version: "5"
 
 discord:
   webhookUrl: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
@@ -28,19 +28,23 @@ reason:
 
 # Messages
 messages:
-  playerNotFound: "&6&lReport&7&lDSPL &cPlayer not found."
-  onlineplayer: "&6&lReport&7&lDSPL &cThis player is not online"
-  cannotReportPlayer: "&6&lReport&7&lDSPL &cYou cannot report this player."
-  missingReason: "&6&lReport&7&lDSPL &cYou must specify a reason for the report."
-  cooldownMessage: "&6&lReport&7&lDSPL &cYou have to wait &9{timeRemaining} &cseconds before you can send a new report."
-  reportSent: "&6&lReport&7&lDSPL &aYour report has been sent successfully!"
-  noPermission: "&6&lReport&7&lDSPL &cYou do not have permission to run this command."
-  consoleCommand: "&6&lReport&7&lDSPL &cThis command can only be performed by a player."
-  myself: "&6&lReport&7&lDSPL &cYou cannot report yourself!"
+  prefix: "&6&lReport&7&lDSPL"
+  missingID: " &cyou need to specify an id!"
+  reportNotFound: " &cA report with id {id} doesn't exist!"
+  noPlayerMentioned: " &cPlayer not found."
+  usage: " &cCorrect usage /report <user> <reason>"
+  cannotReportPlayer: " &cYou cannot report this player."
+  missingReason: " &cYou must specify a reason for the report."
+  cooldownMessage: " &cYou have to wait &9{timeRemaining} &cseconds before you can send a new report."
+  reportSent: " &aYour report has been sent successfully!"
+  noPermission: " &cYou do not have permission to run this command."
+  consoleCommand: " &cThis command can only be performed by a player."
+  myself: " &cYou cannot report yourself!"
   usageClose: "&cUsage: /rpclose close <id>"
   usageReopen: "&cUsage: /rpreopen reopen <id>"
   reportReopened: "&aReport {id} has been reopened."
   reportClosed: "&aReport {id} has been closed."
+  onlinePlayer: " &cThis player is not online"
   usageDelete: "&cUsage: /rpdelete delete <id>"
   reportDeleted: "&aReport {id} has been deleted."
   invalidPageNumber: "&cInvalid page number."

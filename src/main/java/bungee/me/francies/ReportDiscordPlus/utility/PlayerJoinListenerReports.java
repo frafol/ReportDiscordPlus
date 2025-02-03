@@ -43,10 +43,10 @@ public class PlayerJoinListenerReports implements Listener {
                             messageTemplate.replace("{amount}", String.valueOf(openReports)));
 
                     // Invia il messaggio al giocatore
-                    player.sendMessage(new TextComponent(message));
+                    player.sendMessage(new TextComponent(plugin.getMessage("prefix") + message));
                 } else {
                     // Log in caso il messaggio non sia definito
-                    plugin.getLogger().warning("Il messaggio 'openReportsMessage' is not configured properly.");
+                    plugin.getLogger().warning("Message 'openReportsMessage' is not configured properly.");
                 }
             }
         }

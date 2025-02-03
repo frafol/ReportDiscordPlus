@@ -84,7 +84,7 @@ public class ReportListCommand extends Command {
 
             // Verifica se la pagina richiesta è valida
             if (page > totalPages || page < 1) {
-                player.sendMessage(new TextComponent(plugin.getMessage("invalidPageNumber")));
+                player.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("invalidPageNumber")));
                 return;
             }
 
@@ -93,14 +93,14 @@ public class ReportListCommand extends Command {
             Map<String, String> headerPlaceholders = new HashMap<>();
             headerPlaceholders.put("page", String.valueOf(page));
             headerPlaceholders.put("totalPages", String.valueOf(totalPages));
-            player.sendMessage(new TextComponent(plugin.replacePlaceholders(headerMessage, headerPlaceholders)));
+            player.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.replacePlaceholders(headerMessage, headerPlaceholders)));
 
             // Mostra i report nella pagina corrente
             int start = (page - 1) * reportsPerPage;
             int end = Math.min(start + reportsPerPage, totalReports);
 
             if (totalReports == 0) {
-                player.sendMessage(new TextComponent(plugin.getMessage("noReportsFound")));
+                player.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("noReportsFound")));
                 return;
             }
 
@@ -113,11 +113,11 @@ public class ReportListCommand extends Command {
                 placeholders.put("reported", config.getString("reports." + key + ".reported"));
                 placeholders.put("reason", config.getString("reports." + key + ".reason"));
                 placeholders.put("status", config.getString("reports." + key + ".status"));  // Aggiungi lo status
-                player.sendMessage(new TextComponent(plugin.replacePlaceholders(reportMessage, placeholders)));
+                player.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.replacePlaceholders(reportMessage, placeholders)));
             }
 
         } catch (Exception e) {
-            player.sendMessage(new TextComponent(plugin.getMessage("errorListingReports")));
+            player.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("errorListingReports")));
             e.printStackTrace();
         }
     }
