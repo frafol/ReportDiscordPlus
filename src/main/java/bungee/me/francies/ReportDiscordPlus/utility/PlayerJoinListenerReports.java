@@ -10,6 +10,7 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.Collection;
+import java.util.List;
 
 public class PlayerJoinListenerReports implements Listener {
 
@@ -32,19 +33,21 @@ public class PlayerJoinListenerReports implements Listener {
                     .filter(key -> "open".equalsIgnoreCase(config.getString("reports." + key + ".status")))
                     .count();
 
-            // Se ci sono report aperti, invia il messaggio
             if (openReports > 0) {
-                String messageTemplate = plugin.getConfig().getString("messages.openReportsMessage");
+                List<String> messageTemplate = plugin.getConfig().getStringList("messages.openReportsMessage");
 
-                // Assicurati che il messaggio non sia nullo
-                if (messageTemplate != null) {
-                    // Sostituisci il segnaposto e traduci i codici colore
-                    String message = ChatColor.translateAlternateColorCodes('&',
-                            messageTemplate.replace("{amount}", String.valueOf(openReports)));
+                // Assicurati che il messaggio non sia nullo e non sia vuoto
+                if (messageTemplate != null && !messageTemplate.isEmpty()) {
+                    for (String line : messageTemplate) {
+                        // Sostituisci i segnaposto e traduci i codici colore
+                        String message = ChatColor.translateAlternateColorCodes('&',
+                                line.replace("{amount}", String.valueOf(openReports))
+                                        .replace("{player}", player.getName()));
 
-                    // Invia il messaggio al giocatore
-                    player.sendMessage(new TextComponent(plugin.getMessage("prefix") + message));
-                } else {
+                        // Invia il messaggio al giocatore
+                        player.sendMessage(new TextComponent(plugin.getMessage("prefix") + message));
+                    }
+                }else {
                     // Log in caso il messaggio non sia definito
                     plugin.getLogger().warning("Message 'openReportsMessage' is not configured properly.");
                 }

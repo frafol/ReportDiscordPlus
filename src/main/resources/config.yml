@@ -53,7 +53,6 @@ messages:
   reportListHeader: " &6&lOpen Reports (Page {page}/{totalPages}):"
   noReportsFound: " &cNo report found."
   errorListingReports: " &cError during listing reports."
-  openReportsMessage: " &aThere are {amount} reports open."
   reasonTooShort: " &cThe reason must contain at least {min} characters."
   reasonTooLong: " &cThe reason cannot exceed {max} characters."
   staffAlert:
@@ -62,6 +61,9 @@ messages:
     - "&6- Reported Player: &9{reportedPlayer}"
     - "&6- Reason: &9{reason}"
     - "&6- Server: &9{server}"
+  openReportsMessage:
+    - "&6Hi {player},"
+    - "&6There are {amount} opened reports"
 
 title: "&6&lNEW REPORT FROM {player}"
 subtitle: "&9{reportedPlayer} has been reported for {reason} on {server}"
