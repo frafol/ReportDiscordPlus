@@ -84,11 +84,11 @@ public class ReportCommand extends Command {
                 String server = player.getServer().getInfo().getMotd();
 
                 // Invio a Discord
-                plugin.getDiscordNotifier().sendReportToDiscord(reporter, reportedPlayer.getName(), reason, server);
-
+                if (plugin.getConfig().getBoolean("discord.enabled")) {
+                    plugin.getDiscordNotifier().sendReportToDiscord(reporter, reportedPlayer.getName(), reason, server);
+                }
                 // Notifica allo staff su Minecraft
-                plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reportedPlayer.getName(), reason, server);
-
+                    plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reportedPlayer.getName(), reason, server);
                 // Salvataggio del report nel file YAML
                 saveReportToYAML(reporter, reportedPlayer.getName(), reason, server);
 

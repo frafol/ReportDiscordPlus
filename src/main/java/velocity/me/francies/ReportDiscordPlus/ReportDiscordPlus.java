@@ -191,6 +191,9 @@ public class ReportDiscordPlus {
         return cooldowns;
     }
 
+    public ConfigurationNode getConfig(){
+        return config;
+    }
     public void setCooldown(Player player) {
         int cooldownSeconds = config.node("cooldown").getInt(120);
         long cooldownTime = System.currentTimeMillis() + (cooldownSeconds * 1000L);

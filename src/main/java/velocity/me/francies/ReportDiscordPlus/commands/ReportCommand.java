@@ -108,7 +108,11 @@ public class ReportCommand implements SimpleCommand {
         String reporter = player.getUsername();
         String server = player.getCurrentServer().get().getServerInfo().getName();
 
-        plugin.getDiscordNotifier().sendReportToDiscord(reporter, reportedPlayer.getUsername(), reason, server);
+        boolean isEnabledDs = plugin.getConfig().node("discord.enabled").getBoolean();
+        if (isEnabledDs){
+            plugin.getDiscordNotifier().sendReportToDiscord(reporter, reportedPlayer.getUsername(), reason, server);
+        }
+
         try {
             plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reportedPlayer.getUsername(), reason, server);
         } catch (SerializationException e) {
