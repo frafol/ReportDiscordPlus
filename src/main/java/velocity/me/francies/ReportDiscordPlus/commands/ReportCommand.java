@@ -102,7 +102,7 @@ public class ReportCommand implements SimpleCommand {
 
         String reporter = player.getUsername();
         String reported = reportedPlayer != null ? reportedPlayer.getUsername() : reportedPlayerName;
-        String server = player.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("Unknown");
+        String server = reportedPlayer.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("Unknown");
 
         // Invia il report a Discord se abilitato
         if (plugin.getConfig().node("discord.enabled").getBoolean()) {

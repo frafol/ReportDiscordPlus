@@ -23,12 +23,6 @@ public class StaffNotifier implements SimpleCommand {
     private final String titleText;
     private final String subTitleText;
 
-    /**
-     * Costruttore unico che riceve i parametri necessari:
-     * - plugin (per accedere a Proxy e config)
-     * - messageManager (per i messaggi)
-     * - eventuali testi del titolo e sottotitolo
-     */
     public StaffNotifier(ReportDiscordPlus plugin, MessageManager messageManager, String titleText, String subTitleText) {
         this.plugin = plugin;
         this.messageManager = messageManager;
@@ -37,33 +31,32 @@ public class StaffNotifier implements SimpleCommand {
 
         // Registriamo i comandi "teleportServer" e "teleportPlayer" direttamente QUI
         ProxyServer proxy = plugin.getProxy();
-        proxy.getCommandManager().register("teleportServer", this);   // /teleportServer
         proxy.getCommandManager().register("teleportPlayer", this);   // /teleportPlayer
     }
 
     /**
      * 1) COSTRUISCE I PULSANTI CLICCABILI (RUN COMMAND)
      */
-    private Component buildTeleportButtons(String serverName, String reportedPlayerName) {
+    private Component buildTeleportButtons(String staff, String serverName, String reportedPlayerName) {
 
         // Lettura dal config
         String showTextServerButton = plugin.getConfig()
                 .node("button", "show_text_server_button")
-                .getString("&bTeleport to the server");
+                .getString();
         String teleportToServerText = plugin.getConfig()
                 .node("button", "teleport_to_server")
-                .getString("&6TP-SERVER");
+                .getString();
 
         String showTextTpButton = plugin.getConfig()
                 .node("button", "show_text_tp_button")
-                .getString("&bTeleport to the reported player");
+                .getString();
         String teleportToPlayerText = plugin.getConfig()
                 .node("button", "teleport_to_player")
-                .getString("&aTP-PLAYER");
+                .getString();
 
         String separator = plugin.getConfig()
                 .node("button", "separator")
-                .getString("&6&l-");
+                .getString();
 
         // Pulsante "TP-SERVER" con hover e click -> /teleportServer <serverName>
         Component serverButton = LegacyComponentSerializer.legacyAmpersand()
@@ -72,7 +65,7 @@ public class StaffNotifier implements SimpleCommand {
                         LegacyComponentSerializer.legacyAmpersand().deserialize(showTextServerButton)
                 ))
                 // Esegue il comando "/teleportServer <nomeServer>"
-                .clickEvent(ClickEvent.runCommand("/teleportServer " + serverName));
+                .clickEvent(ClickEvent.runCommand("/server " + staff + " " + serverName));
 
         // Pulsante "TP-PLAYER" con hover e click -> /teleportPlayer <playerName> <serverName>
         Component playerButton = LegacyComponentSerializer.legacyAmpersand()
@@ -138,39 +131,12 @@ public class StaffNotifier implements SimpleCommand {
 
                 // Messaggio testuale
                 staffMember.sendMessage(staffMessage);
-
-                // Pulsanti cliccabili (TP-SERVER / TP-PLAYER)
-                Component buttonMessage = buildTeleportButtons(server, reportedPlayer);
-                staffMember.sendMessage(buttonMessage);
-            }
-        }
-    }
-
-    /**
-     * 3) TELETRASPORTA STAFFER SU UN CERTO SERVER
-     */
-    public void teleportToServer(Player staffMember, String serverName) {
-        Optional<RegisteredServer> targetServer = plugin.getProxy().getServer(serverName);
-        if (!targetServer.isPresent()) {
-            Component serverNotFoundMessage = messageManager.getComponentMessage("messages.serverNotFound", null);
-            staffMember.sendMessage(serverNotFoundMessage);
-            return;
-        }
-
-        String currentServerName = staffMember.getCurrentServer().get().getServerInfo().getName();
-        if (!currentServerName.equals(serverName)) {
-            staffMember.createConnectionRequest(targetServer.get()).connect().thenAccept(result -> {
-                if (result.isSuccessful()) {
-                    Component successMessage = messageManager.getComponentMessage("messages.connectedToServer", null);
-                    staffMember.sendMessage(successMessage);
-                } else {
-                    Component errorMessage = messageManager.getComponentMessage("messages.couldNotConnect", null);
-                    staffMember.sendMessage(errorMessage);
+                if (staffMember.hasPermission("report.mcreport")) {
+                    // Pulsanti cliccabili (TP-SERVER / TP-PLAYER)
+                    Component buttonMessage = buildTeleportButtons(reporter.getUsername(), server, reportedPlayer);
+                    staffMember.sendMessage(buttonMessage);
                 }
-            });
-        } else {
-            Component alreadyOnServerMessage = messageManager.getComponentMessage("messages.alreadyOnServer", null);
-            staffMember.sendMessage(alreadyOnServerMessage);
+            }
         }
     }
 
@@ -180,35 +146,12 @@ public class StaffNotifier implements SimpleCommand {
     public void teleportToPlayer(Player staffMember, String reportedPlayerName, String serverName) {
         Optional<Player> optionalReportedPlayer = plugin.getProxy().getPlayer(reportedPlayerName);
         if (!optionalReportedPlayer.isPresent()) {
-            Component notOnlineMessage = messageManager.getComponentMessage("messages.playerNotOnline", null);
+            Component notOnlineMessage = messageManager.getComponentMessage("messages.onlinePlayer", null);
             staffMember.sendMessage(notOnlineMessage);
             return;
         }
 
-        Player reportedPlayer = optionalReportedPlayer.get();
-        String currentServerName = staffMember.getCurrentServer().get().getServerInfo().getName();
-
-        if (!currentServerName.equals(serverName)) {
-            Optional<RegisteredServer> targetServer = plugin.getProxy().getServer(serverName);
-            if (!targetServer.isPresent()) {
-                Component serverNotFoundMessage = messageManager.getComponentMessage("messages.serverNotFound", null);
-                staffMember.sendMessage(serverNotFoundMessage);
-                return;
-            }
-            // Ci spostiamo sul server di destinazione
-            staffMember.createConnectionRequest(targetServer.get()).connect().thenAccept(result -> {
-                if (result.isSuccessful()) {
-                    // Una volta connessi, teletrasporto
-                    executeTeleportCommand(staffMember, reportedPlayerName);
-                } else {
-                    Component errorMessage = messageManager.getComponentMessage("messages.couldNotConnect", null);
-                    staffMember.sendMessage(errorMessage);
-                }
-            });
-        } else {
-            // Già sul server corretto
             executeTeleportCommand(staffMember, reportedPlayerName);
-        }
     }
 
     /**
@@ -219,10 +162,6 @@ public class StaffNotifier implements SimpleCommand {
         staffMember.spoofChatInput("/tp " + reportedPlayerName);
     }
 
-    // ----------------------------------------------------------------------
-    // 5) GESTIONE COMANDI VELOCITY (SimpleCommand)
-    // Registrati nel costruttore, e gestiti qui
-    // ----------------------------------------------------------------------
 
     @Override
     public void execute(Invocation invocation) {
@@ -242,21 +181,10 @@ public class StaffNotifier implements SimpleCommand {
             return;
         }
 
-        // COMANDO: /teleportServer <serverName>
-        if (alias.equalsIgnoreCase("teleportServer")) {
-            if (args.length < 1) {
-                staffMember.sendMessage(Component.text("Usage: /teleportServer <serverName>"));
-                return;
-            }
-            String serverName = args[0];
-            teleportToServer(staffMember, serverName);
-            return;
-        }
 
         // COMANDO: /teleportPlayer <playerName> <serverName>
         if (alias.equalsIgnoreCase("teleportPlayer")) {
             if (args.length < 2) {
-                staffMember.sendMessage(Component.text("Usage: /teleportPlayer <playerName> <serverName>"));
                 return;
             }
             String targetPlayer = args[0];
@@ -265,11 +193,5 @@ public class StaffNotifier implements SimpleCommand {
         }
     }
 
-    /**
-     * Facoltativamente puoi gestire suggerimenti per il tab-complete dei comandi.
-     */
-    @Override
-    public List<String> suggest(Invocation invocation) {
-        return Collections.emptyList(); // Nessun suggerimento specifico
-    }
+
 }
