@@ -4,7 +4,7 @@
 #
 # These settings are very important for the plugin to work
 
-config_version: "6"
+config_version: "7"
 
 discord:
   enabled: true

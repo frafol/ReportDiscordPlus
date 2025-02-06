@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "7.0.1", authors = {"Francies"})
+@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "7.1.1", authors = {"Francies"})
 public class ReportDiscordPlus {
     private final Path dataDirectory;
     private final Map<String, Long> cooldowns = new HashMap<>();
@@ -70,7 +70,7 @@ public class ReportDiscordPlus {
         this.discordNotifier = new DiscordNotifier(config, logger, messageManager);
         String titleText = messageManager.getRawMessage("title");
         String subTitleText = messageManager.getRawMessage("subtitle");
-        this.staffNotifier = new StaffNotifier(titleText, subTitleText, this, messageManager);
+        this.staffNotifier = new StaffNotifier(this, messageManager, titleText, subTitleText);
 
         // Registra comandi ed eventi
         server.getEventManager().register(this, new PlayerLoginListener(this, server, messageManager));
@@ -86,7 +86,7 @@ public class ReportDiscordPlus {
         // Avvia il controllo degli aggiornamenti
         checkForUpdates();
         String version = messageManager.getRawMessage("config_version");
-        if (!version.equalsIgnoreCase("6")) {
+        if (!version.equalsIgnoreCase("7")) {
             logger.error("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
     }
