@@ -11,6 +11,7 @@ import velocity.me.francies.ReportDiscordPlus.utility.MessageManager;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ReportCommand implements SimpleCommand {
 
@@ -25,7 +26,7 @@ public class ReportCommand implements SimpleCommand {
     @Override
     public void execute(Invocation invocation) {
         if (!(invocation.source() instanceof Player)) {
-            invocation.source().sendMessage(Component.text("Only player can do this command."));
+            invocation.source().sendMessage(Component.text("Only player can execute this command."));
             return;
         }
 
@@ -33,64 +34,59 @@ public class ReportCommand implements SimpleCommand {
         String[] args = invocation.arguments();
 
         if (!player.hasPermission("report.use")) {
-            Component noPermissionMessage = messageManager.getComponentMessage("messages.noPermission", null);
-            player.sendMessage(noPermissionMessage);
+            player.sendMessage(messageManager.getComponentMessage("messages.noPermission", null));
             return;
         }
 
         if (args.length == 0) {
-            Component playerNotFoundMessage = messageManager.getComponentMessage("messages.noPlayerMentioned", null);
-            player.sendMessage(playerNotFoundMessage);
+            player.sendMessage(messageManager.getComponentMessage("messages.noPlayerMentioned", null));
             return;
         }
 
         String reportedPlayerName = args[0];
-        Player reportedPlayer = plugin.getProxy().getPlayer(reportedPlayerName).orElse(null);
+        Optional<Player> reportedPlayerOptional = plugin.getProxy().getPlayer(reportedPlayerName);
+        boolean allowOfflineReports = plugin.getConfig().node("allowOfflineReports").getBoolean(false);
 
-        if (reportedPlayer == null || !reportedPlayer.isActive()) {
-            Component onlinePlayerMessage = messageManager.getComponentMessage("messages.onlinePlayer", null);
-            player.sendMessage(onlinePlayerMessage);
+        // Se il giocatore non è online e "allowOfflineReports" è false, blocchiamo il report
+        if (reportedPlayerOptional.isEmpty() && !allowOfflineReports) {
+            player.sendMessage(messageManager.getComponentMessage("messages.onlinePlayer", null));
             return;
         }
 
-        if (reportedPlayer.equals(player)) {
-            Component selfReportMessage = messageManager.getComponentMessage("messages.myself", null);
-            player.sendMessage(selfReportMessage);
+        Player reportedPlayer = reportedPlayerOptional.orElse(null);
+
+        // Impediamo di segnalare sé stessi se il giocatore è online
+        if (reportedPlayer != null && reportedPlayer.equals(player)) {
+            player.sendMessage(messageManager.getComponentMessage("messages.myself", null));
             return;
         }
 
         String reason = args.length > 1 ? String.join(" ", Arrays.copyOfRange(args, 1, args.length)) : null;
         if (reason == null) {
-            Component missingReasonMessage = messageManager.getComponentMessage("messages.missingReason", null);
-            player.sendMessage(missingReasonMessage);
+            player.sendMessage(messageManager.getComponentMessage("messages.missingReason", null));
             return;
         }
 
-        // Get the minimum and maximum length from the main class
+        // Otteniamo la lunghezza minima e massima dal config
         int minLength = plugin.getMinReasonLength();
         int maxLength = plugin.getMaxReasonLength();
 
-        // Check if the reason is too short
         if (reason.length() < minLength) {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("min", String.valueOf(minLength));
-            Component reasonTooShortMessage = messageManager.getComponentMessage("messages.reasonTooShort", placeholders);
-            player.sendMessage(reasonTooShortMessage);
+            player.sendMessage(messageManager.getComponentMessage("messages.reasonTooShort", placeholders));
             return;
         }
 
-        // Check if the reason is too long
         if (reason.length() > maxLength) {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("max", String.valueOf(maxLength));
-            Component reasonTooLongMessage = messageManager.getComponentMessage("messages.reasonTooLong", placeholders);
-            player.sendMessage(reasonTooLongMessage);
+            player.sendMessage(messageManager.getComponentMessage("messages.reasonTooLong", placeholders));
             return;
         }
 
-        if (plugin.isPlayerInBlacklist(reportedPlayer)) {
-            Component cannotReportPlayerMessage = messageManager.getComponentMessage("messages.cannotReportPlayer", null);
-            player.sendMessage(cannotReportPlayerMessage);
+        if (reportedPlayer != null && plugin.isPlayerInBlacklist(reportedPlayer)) {
+            player.sendMessage(messageManager.getComponentMessage("messages.cannotReportPlayer", null));
             return;
         }
 
@@ -100,46 +96,43 @@ public class ReportCommand implements SimpleCommand {
             long timeRemaining = (cooldownTime - currentTime) / 1000;
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("timeRemaining", String.valueOf(timeRemaining));
-            Component cooldownMessage = messageManager.getComponentMessage("messages.cooldownMessage", placeholders);
-            player.sendMessage(cooldownMessage);
+            player.sendMessage(messageManager.getComponentMessage("messages.cooldownMessage", placeholders));
             return;
         }
 
         String reporter = player.getUsername();
-        String server = player.getCurrentServer().get().getServerInfo().getName();
+        String reported = reportedPlayer != null ? reportedPlayer.getUsername() : reportedPlayerName;
+        String server = player.getCurrentServer().map(s -> s.getServerInfo().getName()).orElse("Unknown");
 
-        boolean isEnabledDs = plugin.getConfig().node("discord.enabled").getBoolean();
-        if (isEnabledDs){
-            plugin.getDiscordNotifier().sendReportToDiscord(reporter, reportedPlayer.getUsername(), reason, server);
+        // Invia il report a Discord se abilitato
+        if (plugin.getConfig().node("discord.enabled").getBoolean()) {
+            plugin.getDiscordNotifier().sendReportToDiscord(reporter, reported, reason, server);
         }
 
         try {
-            plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reportedPlayer.getUsername(), reason, server);
+            plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reported, reason, server);
         } catch (SerializationException e) {
             throw new RuntimeException(e);
         }
+
         try {
-            saveReportToYAML(reporter, reportedPlayer.getUsername(), reason, server);
+            saveReportToYAML(reporter, reported, reason, server);
         } catch (SerializationException e) {
             throw new RuntimeException(e);
         }
 
         plugin.setCooldown(player);
-        Component reportSentMessage = messageManager.getComponentMessage("messages.reportSent", null);
-        player.sendMessage(reportSentMessage);
+        player.sendMessage(messageManager.getComponentMessage("messages.reportSent", null));
     }
-
 
     private void saveReportToYAML(String reporter, String reported, String reason, String server) throws SerializationException {
         int reportId = plugin.getNextReportId();
 
-        // Assicurati che il nodo "reports" sia una mappa
         ConfigurationNode reportsNode = plugin.getReportsConfig().node("reports");
         if (reportsNode.isList()) {
             reportsNode.set(null);  // Resetta se è una lista, lo vogliamo come mappa
         }
 
-        // Imposta i valori nel nodo del report
         ConfigurationNode reportNode = reportsNode.node(String.valueOf(reportId));
         reportNode.node("reporter").set(reporter);
         reportNode.node("reported").set(reported);

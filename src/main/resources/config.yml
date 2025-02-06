@@ -22,6 +22,9 @@ discord:
 # Report cooldown time in seconds
 cooldown: 60  # If left empty, the default value will be 60 seconds
 
+# If true, player can be reported even if they are offline
+allowOfflineReports: false
+
 # Minimum and maximum length of the reason
 reason:
   minLength: 10

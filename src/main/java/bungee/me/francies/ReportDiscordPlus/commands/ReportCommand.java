@@ -27,81 +27,92 @@ public class ReportCommand extends Command {
             ProxiedPlayer player = (ProxiedPlayer) sender;
             if (player.hasPermission("report.use")) {
                 if (args.length == 0) {
-                    player.sendMessage( plugin.getMessage("noPlayerMentioned"));
+                    player.sendMessage(plugin.getMessage("noPlayerMentioned"));
                     return;
                 }
                 String reportedPlayerName = args[0];
                 ProxiedPlayer reportedPlayer = plugin.getProxy().getPlayer(reportedPlayerName);
-                if (reportedPlayer == null || !reportedPlayer.isConnected()) {
-                    player.sendMessage( plugin.getMessage("onlinePlayer"));
+
+                boolean allowOfflineReports = plugin.getConfig().getBoolean("allowOfflineReports", false);
+
+                // Se il giocatore non è online e "allowOfflineReports" è false, blocchiamo il report
+                if ((reportedPlayer == null || !reportedPlayer.isConnected()) && !allowOfflineReports) {
+                    player.sendMessage(plugin.getMessage("onlinePlayer"));
                     return;
                 }
 
-                if (reportedPlayer == sender) {
-                    player.sendMessage( plugin.getMessage("myself"));
+                // Impediamo di segnalare sé stessi
+                if (reportedPlayer != null && reportedPlayer == sender) {
+                    player.sendMessage(plugin.getMessage("myself"));
                     return;
                 }
+
                 String reason = "";
                 if (args.length > 1) {
                     reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                 } else {
-                    player.sendMessage( plugin.getMessage("missingReason"));
+                    player.sendMessage(plugin.getMessage("missingReason"));
                     return;
                 }
 
-                // Get the min and max length from config.yml
+                // Otteniamo la lunghezza minima e massima dal config.yml
                 int minLength = plugin.getConfig().getInt("reason.minLength");
                 int maxLength = plugin.getConfig().getInt("reason.maxLength");
 
-                // Check if the reason is too short
+                // Controlliamo se la motivazione è troppo corta
                 if (reason.length() < minLength) {
-                    player.sendMessage(new TextComponent( plugin.getMessage("reasonTooShort")
+                    player.sendMessage(new TextComponent(plugin.getMessage("reasonTooShort")
                             .replace("{min}", String.valueOf(minLength))));
                     return;
                 }
 
-                // Check if the reason is too long
+                // Controlliamo se la motivazione è troppo lunga
                 if (reason.length() > maxLength) {
-                    player.sendMessage(new TextComponent(  plugin.getMessage("reasonTooLong")
+                    player.sendMessage(new TextComponent(plugin.getMessage("reasonTooLong")
                             .replace("{max}", String.valueOf(maxLength))));
                     return;
                 }
 
-                if (plugin.isPlayerInBlacklist(reportedPlayer)) {
-                    player.sendMessage( plugin.getMessage("cannotReportPlayer"));
+                // Controlliamo se il giocatore segnalato è in una blacklist
+                if (reportedPlayer != null && plugin.isPlayerInBlacklist(reportedPlayer)) {
+                    player.sendMessage(plugin.getMessage("cannotReportPlayer"));
                     return;
                 }
 
+                // Controllo cooldown per evitare spam di segnalazioni
                 if (plugin.hasCooldown(player) && !player.hasPermission("report.bypasscooldown")) {
                     long cooldownTime = plugin.getCooldowns().get(player.getName());
                     long currentTime = System.currentTimeMillis();
                     long timeRemaining = cooldownTime - currentTime;
-                    player.sendMessage( plugin.getMessage("cooldownMessage").replace("{timeRemaining}", String.valueOf(timeRemaining / 1000L)));
+                    player.sendMessage(plugin.getMessage("cooldownMessage")
+                            .replace("{timeRemaining}", String.valueOf(timeRemaining / 1000L)));
                     return;
                 }
 
                 String reporter = player.getName();
+                String reported = reportedPlayer != null ? reportedPlayer.getName() : reportedPlayerName;
                 String server = player.getServer().getInfo().getMotd();
 
                 // Invio a Discord
                 if (plugin.getConfig().getBoolean("discord.enabled")) {
-                    plugin.getDiscordNotifier().sendReportToDiscord(reporter, reportedPlayer.getName(), reason, server);
+                    plugin.getDiscordNotifier().sendReportToDiscord(reporter, reported, reason, server);
                 }
                 // Notifica allo staff su Minecraft
-                    plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reportedPlayer.getName(), reason, server);
+                plugin.getStaffNotifier().sendReportToMinecraftStaff(player, reported, reason, server);
                 // Salvataggio del report nel file YAML
-                saveReportToYAML(reporter, reportedPlayer.getName(), reason, server);
+                saveReportToYAML(reporter, reported, reason, server);
 
+                // Imposta il cooldown per il giocatore
                 plugin.setCooldown(player);
-                player.sendMessage( plugin.getMessage("reportSent"));
+
+                player.sendMessage(plugin.getMessage("reportSent"));
             } else {
-                player.sendMessage( plugin.getMessage("noPermission"));
+                player.sendMessage(plugin.getMessage("noPermission"));
             }
         } else {
-            sender.sendMessage( plugin.getMessage("consoleCommand"));
+            sender.sendMessage(plugin.getMessage("consoleCommand"));
         }
     }
-
 
     private void saveReportToYAML(String reporter, String reported, String reason, String server) {
         try {
