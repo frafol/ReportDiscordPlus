@@ -1,6 +1,7 @@
 package bungee.me.francies.ReportDiscordPlus.commands;
 
 import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -17,10 +18,12 @@ public class ReportListCommand extends Command {
     public ReportListCommand(ReportDiscordPlus plugin) {
         super("reports");
         this.plugin = plugin;
+
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        String prefix = ChatColor.translateAlternateColorCodes('&',  plugin.getMessage("prefix"));
         if (sender instanceof ProxiedPlayer && sender.hasPermission("report.admin")) {
             int page = 1; // Pagina predefinita
             String statusFilter = "all"; // Default mostra tutti i report
@@ -35,7 +38,7 @@ public class ReportListCommand extends Command {
                     try {
                         page = Integer.parseInt(args[0]);
                     } catch (NumberFormatException e) {
-                        sender.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber")));
+                        sender.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber").replace("{prefix}", prefix)));
                         return;
                     }
                 }
@@ -49,23 +52,24 @@ public class ReportListCommand extends Command {
                     } else if (args[0].equalsIgnoreCase("opened")) {
                         statusFilter = "open";
                     } else {
-                        sender.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber")));
+                        sender.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber").replace("{prefix}", prefix)));
                         return;
                     }
 
                 } catch (NumberFormatException e) {
-                    sender.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber")));
+                    sender.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber").replace("{prefix}", prefix)));
                     return;
                 }
             }
 
             listReports((ProxiedPlayer) sender, page, statusFilter);
         } else {
-            sender.sendMessage(new TextComponent( plugin.getMessage("noPermission")));
+            sender.sendMessage(new TextComponent( plugin.getMessage("noPermission").replace("{prefix}", prefix)));
         }
     }
 
     private void listReports(ProxiedPlayer player, int page, String statusFilter) {
+        String prefix = ChatColor.translateAlternateColorCodes('&',  plugin.getMessage("prefix"));
         try {
             // Usa il metodo centralizzato per ottenere il file YAML
             Configuration config = plugin.getReportsConfig();
@@ -84,12 +88,12 @@ public class ReportListCommand extends Command {
 
             // Verifica se la pagina richiesta è valida
             if (page > totalPages || page < 1) {
-                player.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber")));
+                player.sendMessage(new TextComponent( plugin.getMessage("invalidPageNumber").replace("{prefix}", prefix)));
                 return;
             }
 
             // Messaggio di intestazione
-            String headerMessage = plugin.getConfig().getString("messages.reportListHeader", "&6&lReports (Page {page}/{totalPages}):");
+            String headerMessage = plugin.getConfig().getString("messages.reportListHeader", "&6&lReports (Page {page}/{totalPages}):").replace("{prefix}", prefix);
             Map<String, String> headerPlaceholders = new HashMap<>();
             headerPlaceholders.put("page", String.valueOf(page));
             headerPlaceholders.put("totalPages", String.valueOf(totalPages));
@@ -100,13 +104,13 @@ public class ReportListCommand extends Command {
             int end = Math.min(start + reportsPerPage, totalReports);
 
             if (totalReports == 0) {
-                player.sendMessage(new TextComponent( plugin.getMessage("noReportsFound")));
+                player.sendMessage(new TextComponent( plugin.getMessage("noReportsFound").replace("{prefix}", prefix)));
                 return;
             }
 
             for (int i = start; i < end; i++) {
                 String key = reportKeys.get(i);
-                String reportMessage = plugin.getConfig().getString("messages.reportListItem", "&7- &eReport {id}: {reporter} -> {reported} ({reason}) [Status: {status}]");
+                String reportMessage = plugin.getConfig().getString("messages.reportListItem", "&7- &eReport {id}: {reporter} -> {reported} ({reason}) [Status: {status}]").replace("{prefix}", prefix);
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("id", key);
                 placeholders.put("reporter", config.getString("reports." + key + ".reporter"));
@@ -117,7 +121,7 @@ public class ReportListCommand extends Command {
             }
 
         } catch (Exception e) {
-            player.sendMessage(new TextComponent( plugin.getMessage("errorListingReports")));
+            player.sendMessage(new TextComponent( plugin.getMessage("errorListingReports").replace("{prefix}", prefix)));
             e.printStackTrace();
         }
     }

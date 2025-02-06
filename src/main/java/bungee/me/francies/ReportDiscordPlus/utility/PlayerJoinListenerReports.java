@@ -23,7 +23,7 @@ public class PlayerJoinListenerReports implements Listener {
     @EventHandler
     public void onPlayerJoin(PostLoginEvent event) {
         ProxiedPlayer player = event.getPlayer();
-
+        String prefix = ChatColor.translateAlternateColorCodes('&',  plugin.getMessage("prefix"));
         // Verifica se il giocatore ha il permesso report.admin
         if (player.hasPermission("report.admin")) {
             // Ottieni i report aperti
@@ -42,7 +42,8 @@ public class PlayerJoinListenerReports implements Listener {
                         // Sostituisci i segnaposto e traduci i codici colore
                         String message = ChatColor.translateAlternateColorCodes('&',
                                 line.replace("{amount}", String.valueOf(openReports))
-                                        .replace("{player}", player.getName()));
+                                        .replace("{player}", player.getName())
+                                        .replace("{prefix}", prefix));
 
                         // Invia il messaggio al giocatore
                         player.sendMessage(new TextComponent(  message));

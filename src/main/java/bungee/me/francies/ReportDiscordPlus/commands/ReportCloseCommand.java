@@ -1,6 +1,7 @@
 package bungee.me.francies.ReportDiscordPlus.commands;
 
 import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
@@ -19,19 +20,19 @@ public class ReportCloseCommand extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        // Controllo permessi
+        String prefix = ChatColor.translateAlternateColorCodes('&',  plugin.getMessage("prefix"));
         if (!sender.hasPermission("report.admin")) {
-            sender.sendMessage(new TextComponent(  plugin.getMessage("noPermission")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("noPermission").replace("{prefix}", prefix)));
             return;
         }
 
         if (args.length < 1) {
             // Manca sia il giocatore che l'id
-            sender.sendMessage(new TextComponent( plugin.getMessage("usageClose")));
+            sender.sendMessage(new TextComponent( plugin.getMessage("usageClose").replace("{prefix}", prefix)));
             return;
         } else if (args.length < 2) {
             // Ha specificato il giocatore, ma manca l’id
-            sender.sendMessage(new TextComponent( plugin.getMessage("missingID")));
+            sender.sendMessage(new TextComponent( plugin.getMessage("missingID").replace("{prefix}", prefix)));
             return;
         }
 
@@ -51,15 +52,15 @@ public class ReportCloseCommand extends Command {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("id", reportId);
 
-            String closeMessage = plugin.getConfig().getString("messages.reportClosed");
+            String closeMessage = plugin.getConfig().getString("messages.reportClosed").replace("{prefix}", prefix);
             closeMessage = plugin.replacePlaceholders(closeMessage, placeholders);
-            sender.sendMessage(new TextComponent(  closeMessage));
+            sender.sendMessage(new TextComponent(closeMessage));
         } else {
             // Se il report non esiste, inviamo un messaggio di errore dedicato
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("id", reportId);
 
-            String notFoundMessage = plugin.getMessage("reportNotFound");
+            String notFoundMessage = plugin.getMessage("reportNotFound").replace("{prefix}", prefix);
             // Esempio di messaggio in config: "&cNessun report trovato con l'ID {id}."
 
             notFoundMessage = plugin.replacePlaceholders(notFoundMessage, placeholders);

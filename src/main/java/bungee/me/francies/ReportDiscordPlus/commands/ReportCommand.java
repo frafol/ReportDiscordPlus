@@ -1,6 +1,7 @@
 package bungee.me.francies.ReportDiscordPlus.commands;
 
 import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -23,11 +24,12 @@ public class ReportCommand extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        String prefix = ChatColor.translateAlternateColorCodes('&',  plugin.getMessage("prefix"));
         if (sender instanceof ProxiedPlayer) {
             ProxiedPlayer player = (ProxiedPlayer) sender;
             if (player.hasPermission("report.use")) {
                 if (args.length == 0) {
-                    player.sendMessage(plugin.getMessage("noPlayerMentioned"));
+                    player.sendMessage(plugin.getMessage("noPlayerMentioned").replace("{prefix}", prefix));
                     return;
                 }
                 String reportedPlayerName = args[0];
@@ -37,13 +39,13 @@ public class ReportCommand extends Command {
 
                 // Se il giocatore non è online e "allowOfflineReports" è false, blocchiamo il report
                 if ((reportedPlayer == null || !reportedPlayer.isConnected()) && !allowOfflineReports) {
-                    player.sendMessage(plugin.getMessage("onlinePlayer"));
+                    player.sendMessage(plugin.getMessage("onlinePlayer").replace("{prefix}", prefix));
                     return;
                 }
 
                 // Impediamo di segnalare sé stessi
                 if (reportedPlayer != null && reportedPlayer == sender) {
-                    player.sendMessage(plugin.getMessage("myself"));
+                    player.sendMessage(plugin.getMessage("myself").replace("{prefix}", prefix));
                     return;
                 }
 
@@ -51,7 +53,7 @@ public class ReportCommand extends Command {
                 if (args.length > 1) {
                     reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                 } else {
-                    player.sendMessage(plugin.getMessage("missingReason"));
+                    player.sendMessage(plugin.getMessage("missingReason").replace("{prefix}", prefix));
                     return;
                 }
 
@@ -62,20 +64,24 @@ public class ReportCommand extends Command {
                 // Controlliamo se la motivazione è troppo corta
                 if (reason.length() < minLength) {
                     player.sendMessage(new TextComponent(plugin.getMessage("reasonTooShort")
-                            .replace("{min}", String.valueOf(minLength))));
+                            .replace("{min}", String.valueOf(minLength))
+                            .replace("{prefix}", prefix)
+                    ));
                     return;
                 }
 
                 // Controlliamo se la motivazione è troppo lunga
                 if (reason.length() > maxLength) {
                     player.sendMessage(new TextComponent(plugin.getMessage("reasonTooLong")
-                            .replace("{max}", String.valueOf(maxLength))));
+                            .replace("{max}", String.valueOf(maxLength))
+                            .replace("{prefix}", prefix)
+                    ));
                     return;
                 }
 
                 // Controlliamo se il giocatore segnalato è in una blacklist
                 if (reportedPlayer != null && plugin.isPlayerInBlacklist(reportedPlayer)) {
-                    player.sendMessage(plugin.getMessage("cannotReportPlayer"));
+                    player.sendMessage(plugin.getMessage("cannotReportPlayer").replace("{prefix}", prefix));
                     return;
                 }
 
@@ -85,7 +91,8 @@ public class ReportCommand extends Command {
                     long currentTime = System.currentTimeMillis();
                     long timeRemaining = cooldownTime - currentTime;
                     player.sendMessage(plugin.getMessage("cooldownMessage")
-                            .replace("{timeRemaining}", String.valueOf(timeRemaining / 1000L)));
+                            .replace("{timeRemaining}", String.valueOf(timeRemaining / 1000L))
+                            .replace("{prefix}", prefix));
                     return;
                 }
 
@@ -105,12 +112,12 @@ public class ReportCommand extends Command {
                 // Imposta il cooldown per il giocatore
                 plugin.setCooldown(player);
 
-                player.sendMessage(plugin.getMessage("reportSent"));
+                player.sendMessage(plugin.getMessage("reportSent").replace("{prefix}", prefix));
             } else {
-                player.sendMessage(plugin.getMessage("noPermission"));
+                player.sendMessage(plugin.getMessage("noPermission").replace("{prefix}", prefix));
             }
         } else {
-            sender.sendMessage(plugin.getMessage("consoleCommand"));
+            sender.sendMessage(plugin.getMessage("consoleCommand").replace("{prefix}", prefix));
         }
     }
 

@@ -68,7 +68,7 @@ public class ReportDiscordPlus extends Plugin {
         subTitleText = ChatColor.translateAlternateColorCodes('&', this.getConfig().getString("subtitle"));
         this.discordNotifier = new DiscordNotifier(config, getLogger(), messages);
         this.staffNotifier = new StaffNotifier(titleText, subTitleText, messages, this);
-        getProxy().getPluginManager().registerCommand(this, new VerifyReportCommand(this));
+        getProxy().getPluginManager().registerCommand(this, new VerifyReportCommand(this)); // blind
         getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
         getProxy().getPluginManager().registerListener(this, new PlayerLoginListener(this));
         getProxy().getPluginManager().registerCommand(this, new ReportCommand(this));
@@ -182,11 +182,8 @@ public class ReportDiscordPlus extends Plugin {
     }
 
     public String getMessage(String key) {
-        String message = this.messages.getOrDefault(key, "");
-        String prefix = this.getConfig().getString("messages.prefix");
-        return message.replace("{prefix}", prefix);
+        return this.messages.getOrDefault(key, "");
     }
-
 
     public boolean isPlayerInBlacklist(ProxiedPlayer player) {
         return player.hasPermission("report.protection");

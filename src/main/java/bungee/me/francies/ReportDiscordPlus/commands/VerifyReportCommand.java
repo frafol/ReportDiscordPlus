@@ -1,6 +1,7 @@
 package bungee.me.francies.ReportDiscordPlus.commands;
 
 import bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -18,6 +19,7 @@ public class VerifyReportCommand extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        String prefix = ChatColor.translateAlternateColorCodes('&',  plugin.getMessage("prefix"));
         if (!(sender instanceof ProxiedPlayer)) {
             sender.sendMessage(new TextComponent( "Only players can use this command."));
             return;
@@ -27,7 +29,7 @@ public class VerifyReportCommand extends Command {
 
         // Verifica che lo staff abbia il permesso "report.tp"
         if (!staffMember.hasPermission("report.tp")) {
-            staffMember.sendMessage(new TextComponent(  plugin.getMessage("noPermission")));
+            staffMember.sendMessage(new TextComponent(  plugin.getMessage("noPermission").replace("{prefix}", prefix)));
             return;
         }
 

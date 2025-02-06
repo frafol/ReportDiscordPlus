@@ -28,11 +28,6 @@ public class StaffNotifier {
     }
 
     public void sendReportToMinecraftStaff(ProxiedPlayer reporter, String reportedPlayer, String reason, String server) {
-        ProxiedPlayer reported = ProxyServer.getInstance().getPlayer(reportedPlayer);
-        if (reported == null) {
-            reporter.sendMessage(new TextComponent(ChatColor.RED + "The reported player is not online."));
-            return;
-        }
 
         List<String> staffMessageList = plugin.getConfig().getStringList("messages.staffAlert");
 
