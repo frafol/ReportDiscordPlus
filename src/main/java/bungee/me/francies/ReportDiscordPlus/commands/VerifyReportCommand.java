@@ -19,7 +19,7 @@ public class VerifyReportCommand extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof ProxiedPlayer)) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +"Only players can use this command."));
+            sender.sendMessage(new TextComponent( "Only players can use this command."));
             return;
         }
 
@@ -27,13 +27,13 @@ public class VerifyReportCommand extends Command {
 
         // Verifica che lo staff abbia il permesso "report.tp"
         if (!staffMember.hasPermission("report.tp")) {
-            staffMember.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("noPermission")));
+            staffMember.sendMessage(new TextComponent(  plugin.getMessage("noPermission")));
             return;
         }
 
         // Controlla che ci siano abbastanza argomenti
         if (args.length < 2) {
-            staffMember.sendMessage(new TextComponent(plugin.getMessage("prefix") + "Usage: /verifyreport <player> <server>"));
+            staffMember.sendMessage(new TextComponent(  "Usage: /verifyreport <player> <server>"));
             return;
         }
 

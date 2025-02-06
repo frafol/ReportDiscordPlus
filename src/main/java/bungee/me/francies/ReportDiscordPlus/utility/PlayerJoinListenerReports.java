@@ -45,7 +45,7 @@ public class PlayerJoinListenerReports implements Listener {
                                         .replace("{player}", player.getName()));
 
                         // Invia il messaggio al giocatore
-                        player.sendMessage(new TextComponent(plugin.getMessage("prefix") + message));
+                        player.sendMessage(new TextComponent(  message));
                     }
                 }else {
                     // Log in caso il messaggio non sia definito

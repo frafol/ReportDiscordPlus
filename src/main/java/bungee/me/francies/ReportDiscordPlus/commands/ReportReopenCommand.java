@@ -20,19 +20,19 @@ public class ReportReopenCommand extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("report.admin")) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("noPermission")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("noPermission")));
             return;
         }
 
         // Controllo che ci siano almeno 2 argomenti (sub-comando "reopen" e l'ID)
         if (args.length < 2) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageReopen")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("usageReopen")));
             return;
         }
 
         // Controllo che il primo argomento sia "reopen"
         if (!args[0].equalsIgnoreCase("reopen")) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageReopen")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("usageReopen")));
             return;
         }
 
@@ -51,14 +51,14 @@ public class ReportReopenCommand extends Command {
 
             String reopenMessage = plugin.getConfig().getString("messages.reportReopened");
             reopenMessage = plugin.replacePlaceholders(reopenMessage, placeholders);
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + reopenMessage));
+            sender.sendMessage(new TextComponent(  reopenMessage));
         } else {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("id", reportId);
 
             String notFoundMessage = plugin.getMessage("reportNotFound");
             notFoundMessage = plugin.replacePlaceholders(notFoundMessage, placeholders);
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + notFoundMessage));
+            sender.sendMessage(new TextComponent(  notFoundMessage));
         }
     }
 }

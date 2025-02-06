@@ -21,17 +21,17 @@ public class ReportCloseCommand extends Command {
     public void execute(CommandSender sender, String[] args) {
         // Controllo permessi
         if (!sender.hasPermission("report.admin")) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("noPermission")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("noPermission")));
             return;
         }
 
         if (args.length < 1) {
             // Manca sia il giocatore che l'id
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("usageClose")));
+            sender.sendMessage(new TextComponent( plugin.getMessage("usageClose")));
             return;
         } else if (args.length < 2) {
             // Ha specificato il giocatore, ma manca l’id
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("missingID")));
+            sender.sendMessage(new TextComponent( plugin.getMessage("missingID")));
             return;
         }
 
@@ -53,7 +53,7 @@ public class ReportCloseCommand extends Command {
 
             String closeMessage = plugin.getConfig().getString("messages.reportClosed");
             closeMessage = plugin.replacePlaceholders(closeMessage, placeholders);
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + closeMessage));
+            sender.sendMessage(new TextComponent(  closeMessage));
         } else {
             // Se il report non esiste, inviamo un messaggio di errore dedicato
             Map<String, String> placeholders = new HashMap<>();
@@ -63,7 +63,7 @@ public class ReportCloseCommand extends Command {
             // Esempio di messaggio in config: "&cNessun report trovato con l'ID {id}."
 
             notFoundMessage = plugin.replacePlaceholders(notFoundMessage, placeholders);
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + notFoundMessage));
+            sender.sendMessage(new TextComponent(  notFoundMessage));
         }
     }
 }

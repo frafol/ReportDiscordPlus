@@ -27,25 +27,25 @@ public class ReportCommand extends Command {
             ProxiedPlayer player = (ProxiedPlayer) sender;
             if (player.hasPermission("report.use")) {
                 if (args.length == 0) {
-                    player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("noPlayerMentioned"));
+                    player.sendMessage( plugin.getMessage("noPlayerMentioned"));
                     return;
                 }
                 String reportedPlayerName = args[0];
                 ProxiedPlayer reportedPlayer = plugin.getProxy().getPlayer(reportedPlayerName);
                 if (reportedPlayer == null || !reportedPlayer.isConnected()) {
-                    player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("onlinePlayer"));
+                    player.sendMessage( plugin.getMessage("onlinePlayer"));
                     return;
                 }
 
                 if (reportedPlayer == sender) {
-                    player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("myself"));
+                    player.sendMessage( plugin.getMessage("myself"));
                     return;
                 }
                 String reason = "";
                 if (args.length > 1) {
                     reason = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                 } else {
-                    player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("missingReason"));
+                    player.sendMessage( plugin.getMessage("missingReason"));
                     return;
                 }
 
@@ -55,20 +55,20 @@ public class ReportCommand extends Command {
 
                 // Check if the reason is too short
                 if (reason.length() < minLength) {
-                    player.sendMessage(new TextComponent(plugin.getMessage("prefix") +plugin.getMessage("reasonTooShort")
+                    player.sendMessage(new TextComponent( plugin.getMessage("reasonTooShort")
                             .replace("{min}", String.valueOf(minLength))));
                     return;
                 }
 
                 // Check if the reason is too long
                 if (reason.length() > maxLength) {
-                    player.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("reasonTooLong")
+                    player.sendMessage(new TextComponent(  plugin.getMessage("reasonTooLong")
                             .replace("{max}", String.valueOf(maxLength))));
                     return;
                 }
 
                 if (plugin.isPlayerInBlacklist(reportedPlayer)) {
-                    player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("cannotReportPlayer"));
+                    player.sendMessage( plugin.getMessage("cannotReportPlayer"));
                     return;
                 }
 
@@ -76,7 +76,7 @@ public class ReportCommand extends Command {
                     long cooldownTime = plugin.getCooldowns().get(player.getName());
                     long currentTime = System.currentTimeMillis();
                     long timeRemaining = cooldownTime - currentTime;
-                    player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("cooldownMessage").replace("{timeRemaining}", String.valueOf(timeRemaining / 1000L)));
+                    player.sendMessage( plugin.getMessage("cooldownMessage").replace("{timeRemaining}", String.valueOf(timeRemaining / 1000L)));
                     return;
                 }
 
@@ -93,12 +93,12 @@ public class ReportCommand extends Command {
                 saveReportToYAML(reporter, reportedPlayer.getName(), reason, server);
 
                 plugin.setCooldown(player);
-                player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("reportSent"));
+                player.sendMessage( plugin.getMessage("reportSent"));
             } else {
-                player.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("noPermission"));
+                player.sendMessage( plugin.getMessage("noPermission"));
             }
         } else {
-            sender.sendMessage(plugin.getMessage("prefix") +plugin.getMessage("consoleCommand"));
+            sender.sendMessage( plugin.getMessage("consoleCommand"));
         }
     }
 

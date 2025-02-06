@@ -182,8 +182,11 @@ public class ReportDiscordPlus extends Plugin {
     }
 
     public String getMessage(String key) {
-        return this.messages.getOrDefault(key, "");
+        String message = this.messages.getOrDefault(key, "");
+        String prefix = this.getConfig().getString("messages.prefix");
+        return message.replace("{prefix}", prefix);
     }
+
 
     public boolean isPlayerInBlacklist(ProxiedPlayer player) {
         return player.hasPermission("report.protection");

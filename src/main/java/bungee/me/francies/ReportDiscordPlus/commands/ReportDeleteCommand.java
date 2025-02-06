@@ -20,19 +20,19 @@ public class ReportDeleteCommand extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!sender.hasPermission("report.admin")) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("noPermission")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("noPermission")));
             return;
         }
 
         // Controllo che ci siano almeno 2 argomenti (sub-comando "delete" e l'ID)
         if (args.length < 2) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageDelete")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("usageDelete")));
             return;
         }
 
         // Controllo che il primo argomento sia "delete"
         if (!args[0].equalsIgnoreCase("delete")) {
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + plugin.getMessage("usageDelete")));
+            sender.sendMessage(new TextComponent(  plugin.getMessage("usageDelete")));
             return;
         }
 
@@ -50,14 +50,14 @@ public class ReportDeleteCommand extends Command {
 
             String deleteMessage = plugin.getConfig().getString("messages.reportDeleted");
             deleteMessage = plugin.replacePlaceholders(deleteMessage, placeholders);
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + deleteMessage));
+            sender.sendMessage(new TextComponent(  deleteMessage));
         } else {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("id", reportId);
 
             String notFoundMessage = plugin.getMessage("reportNotFound");
             notFoundMessage = plugin.replacePlaceholders(notFoundMessage, placeholders);
-            sender.sendMessage(new TextComponent(plugin.getMessage("prefix") + notFoundMessage));
+            sender.sendMessage(new TextComponent(  notFoundMessage));
         }
     }
 }
