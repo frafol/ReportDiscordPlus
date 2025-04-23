@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "7.1.1", authors = {"Francies"})
+@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "7.1.4", authors = {"Francies"})
 public class ReportDiscordPlus {
     private final Path dataDirectory;
     private final Map<String, Long> cooldowns = new HashMap<>();
@@ -74,19 +74,18 @@ public class ReportDiscordPlus {
 
         // Registra comandi ed eventi
         server.getEventManager().register(this, new PlayerLoginListener(this, server, messageManager));
-        // TODO server.getCommandManager().register("verifyreport", new VerifyReportCommand(this, messageManager));
         server.getCommandManager().register("report", new ReportCommand(this, messageManager));
         server.getCommandManager().register("reports", new ReportListCommand(this, messageManager));
         server.getCommandManager().register("rpclose", new ReportCloseCommand(this, messageManager));
         server.getCommandManager().register("rpreopen", new ReportReopenCommand(this, messageManager));
         server.getCommandManager().register("rpdelete", new ReportDeleteCommand(this, messageManager));
-        server.getCommandManager().register("server", new RunStaffCommand(server));
+        server.getCommandManager().register("rpserver", new RunStaffCommand(server));
         server.getEventManager().register(this, new PlayerJoinListenerReports(this, messageManager));
 
         // Avvia il controllo degli aggiornamenti
         checkForUpdates();
         String version = messageManager.getRawMessage("config_version");
-        if (!version.equalsIgnoreCase("7")) {
+        if (!version.equalsIgnoreCase("8")) {
             logger.error("YOUR CONFIG IS NOT UPDATED, CHECK HERE: https://discord.gg/SGtHSCTaEX");
         }
     }
@@ -245,7 +244,7 @@ public class ReportDiscordPlus {
                 String downloadUrl1 = json.get("downloadUrl1").getAsString();
 
                 // Ottieni la versione attuale (del proxy o del plugin, a seconda di ciò che ti serve)
-                String currentVersion = "7.0.0";
+                String currentVersion = "7.1.4";
 
                 // Se la versione è diversa, notifica gli admin
                 if (!currentVersion.equals(latestVersion)) {
@@ -257,7 +256,7 @@ public class ReportDiscordPlus {
                     );
 
                     // Carica la lista di messaggi dalla config
-                    List<String> updateMessages = messageManager.getRawMessageList("updateMessage");
+                    List<String> updateMessages = messageManager.getMessageList("updateMessage",null);
 
                     if (updateMessages != null && !updateMessages.isEmpty()) {
                         // Invia i messaggi di aggiornamento agli staff con permesso "report.admin"

@@ -1,5 +1,5 @@
 name: ReportDiscordPlus
-version: '7.1.1'
+version: '7.1.4'
 main: bungee.me.francies.ReportDiscordPlus.ReportDiscordPlus
 author: Francies
 api-version: '1.13'
@@ -24,6 +24,9 @@ permissions:
     description: Allows to not be reported
   report.admin:
     description: Admins perms
+    default: op
+  report.notify:
+    description: Notify reports list
     default: op
 commands:
   report:

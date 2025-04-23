@@ -28,7 +28,7 @@ public class PlayerJoinListenerReports {
         Player player = event.getPlayer();
 
         // Verifica se il giocatore ha il permesso report.admin
-        if (player.hasPermission("report.admin")) {
+        if (player.hasPermission("report.notify")) {
             // Ottieni i report aperti
             ConfigurationNode config = plugin.getReportsConfig();
             Collection<Object> keys = config.node("reports").childrenMap().keySet();
@@ -44,18 +44,19 @@ public class PlayerJoinListenerReports {
 
                 try {
                     // Ottiene la lista di messaggi dal file di configurazione
-                    List<String> messageList = messageManager.getRawMessageList("messages.openReportsMessage");
+                    List<String> messageList = messageManager.getMessageList("messages.openReportsMessage", placeholders);
 
                     // Verifica che la lista non sia vuota
                     if (!messageList.isEmpty()) {
                         for (String line : messageList) {
-                            // Sostituisci i segnaposto e converte in Component
-                            Component message = messageManager.getComponentMessage("messages.openReportsMessage", placeholders);
+                            // Sostituiamo i placeholder manualmente e convertiamo la stringa in Component
+                            String formattedMessage = messageManager.replacePlaceholders(line, placeholders);
+                            Component message = messageManager.deserializeMessage(formattedMessage);
                             player.sendMessage(message);
                         }
                     }
                 } catch (SerializationException e) {
-                    e.getLocalizedMessage();
+                    e.printStackTrace();
                 }
             }
         }

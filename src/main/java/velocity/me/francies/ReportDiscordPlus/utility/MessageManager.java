@@ -8,6 +8,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class MessageManager {
 
@@ -50,10 +51,29 @@ public class MessageManager {
     }
 
     /**
-     * Restituisce una lista di messaggi dal file di configurazione.
+     * Restituisce una lista di messaggi dal file di configurazione con i placeholder sostituiti.
+     * Il prefisso compare solo se è presente {prefix}.
      */
-    public List<String> getRawMessageList(String path) throws SerializationException {
-        return config.node((Object[]) path.split("\\.")).getList(String.class, List.of());
+    public List<String> getMessageList(String path, Map<String, String> placeholders) throws SerializationException {
+        List<String> messages = config.node((Object[]) path.split("\\.")).getList(String.class, List.of());
+
+        if (messages == null || messages.isEmpty()) {
+            return List.of();
+        }
+
+        // Se la mappa dei placeholder è nulla, ne creiamo una nuova per sicurezza
+        if (placeholders == null) {
+            placeholders = new HashMap<>();
+        }
+
+        // Aggiungiamo il placeholder {prefix} alla mappa
+        placeholders.put("prefix", prefixString);
+
+        // Sostituiamo i placeholder in ogni messaggio della lista
+        Map<String, String> finalPlaceholders = placeholders;
+        return messages.stream()
+                .map(message -> replacePlaceholders(message, finalPlaceholders))
+                .collect(Collectors.toList());
     }
 
     /**

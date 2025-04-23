@@ -65,7 +65,7 @@ public class StaffNotifier implements SimpleCommand {
                         LegacyComponentSerializer.legacyAmpersand().deserialize(showTextServerButton)
                 ))
                 // Esegue il comando "/teleportServer <nomeServer>"
-                .clickEvent(ClickEvent.runCommand("/server " + staff + " " + serverName));
+                .clickEvent(ClickEvent.runCommand("/rpserver " + staff + " " + serverName));
 
         // Pulsante "TP-PLAYER" con hover e click -> /teleportPlayer <playerName> <serverName>
         Component playerButton = LegacyComponentSerializer.legacyAmpersand()
@@ -96,7 +96,7 @@ public class StaffNotifier implements SimpleCommand {
         placeholders.put("server", server);
 
         // Messaggi multilinea da config
-        List<String> staffMessageList = messageManager.getRawMessageList("messages.staffAlert");
+        List<String> staffMessageList = messageManager.getMessageList("messages.staffAlert", null);
         if (staffMessageList == null || staffMessageList.isEmpty()) {
             reporter.sendMessage(
                     LegacyComponentSerializer.legacyAmpersand()

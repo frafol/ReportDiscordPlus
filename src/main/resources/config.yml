@@ -4,7 +4,7 @@
 #
 # These settings are very important for the plugin to work
 
-config_version: "7"
+config_version: "8"
 
 discord:
   enabled: true
@@ -29,6 +29,10 @@ allowOfflineReports: false
 reason:
   minLength: 10
   maxLength: 100
+
+#/report will not work here
+ignored-servers:
+  - hub
 
 # Messages
 messages:
@@ -58,6 +62,7 @@ messages:
   errorListingReports: "{prefix} &cError during listing reports."
   reasonTooShort: "{prefix} &cThe reason must contain at least {min} characters."
   reasonTooLong: "{prefix} &cThe reason cannot exceed {max} characters."
+  cannotReportHere: "{prefix} &cYou cannot report here!"
   staffAlert:
     - "&6&lNew report available!"
     - "&6Player: &9{player}"

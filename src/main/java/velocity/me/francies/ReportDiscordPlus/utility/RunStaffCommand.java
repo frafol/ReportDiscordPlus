@@ -14,6 +14,7 @@ public class RunStaffCommand implements SimpleCommand {
 
     @Override
     public void execute(Invocation invocation) {
+        System.out.println( invocation.toString());
         if (invocation.arguments().length < 2) {
             invocation.source().sendMessage(Component.text(" "));
             return;

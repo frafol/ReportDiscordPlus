@@ -24,8 +24,8 @@ public class PlayerJoinListenerReports implements Listener {
     public void onPlayerJoin(PostLoginEvent event) {
         ProxiedPlayer player = event.getPlayer();
         String prefix = ChatColor.translateAlternateColorCodes('&',  plugin.getMessage("prefix"));
-        // Verifica se il giocatore ha il permesso report.admin
-        if (player.hasPermission("report.admin")) {
+        // Verifica se il giocatore ha il permesso report.notify
+        if (player.hasPermission("report.notify")) {
             // Ottieni i report aperti
             Configuration config = plugin.getReportsConfig();
             Collection<String> keys = config.getSection("reports").getKeys();
