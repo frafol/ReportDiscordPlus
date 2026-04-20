@@ -40,7 +40,7 @@ public class ReportDiscordPlus extends Plugin {
     private File reportsFile;
     private DiscordNotifier discordNotifier;
     private StaffNotifier staffNotifier;
-    private final String versionUrl = "https://www.francescoferrara.it/api/reportdiscordplus.json";
+    //private final String versionUrl = "https://www.francescoferrara.it/api/reportdiscordplus.json";
 
     public void onEnable() {
         int pluginId = 23259;
@@ -212,7 +212,7 @@ public class ReportDiscordPlus extends Plugin {
     }
     public void checkForUpdates() {
         try {
-            URL url = new URL(versionUrl);
+            /*URL url = new URL(versionUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
@@ -229,7 +229,8 @@ public class ReportDiscordPlus extends Plugin {
             JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
             String latestVersion = json.get("version").getAsString();
             String downloadUrl1 = json.get("downloadUrl1").getAsString();
-
+*/          String latestVersion =  "7.1.5";
+            String downloadUrl1 = "https://www.spigotmc.org/resources/%E2%AD%90-reportdiscordplus-%E2%AD%90.111055/";
             // Ottieni la versione attuale del plugin
             String currentVersion = this.getDescription().getVersion();
 

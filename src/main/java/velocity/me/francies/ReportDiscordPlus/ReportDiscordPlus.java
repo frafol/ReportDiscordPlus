@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "7.1.4", authors = {"Francies"})
+@Plugin(id = "reportdiscordplus", name = "ReportDiscordPlus", version = "7.1.5", authors = {"Francies"})
 public class ReportDiscordPlus {
     private final Path dataDirectory;
     private final Map<String, Long> cooldowns = new HashMap<>();
@@ -43,7 +43,7 @@ public class ReportDiscordPlus {
     private DiscordNotifier discordNotifier;
     private StaffNotifier staffNotifier;
     private MessageManager messageManager;
-    private final String versionUrl = "https://www.francescoferrara.it/api/reportdiscordplus.json";
+    //private final String versionUrl = "https://www.francescoferrara.it/api/reportdiscordplus.json";
     private final Metrics.Factory metricsFactory;
     private int minLength;
     private int maxLength;
@@ -224,7 +224,7 @@ public class ReportDiscordPlus {
         server.getScheduler().buildTask(this, () -> {
             try {
                 // Connessione per ottenere le informazioni sulla versione
-                URL url = new URL(versionUrl);
+               /* URL url = new URL(versionUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
 
@@ -242,10 +242,11 @@ public class ReportDiscordPlus {
                 JsonObject json = JsonParser.parseString(content.toString()).getAsJsonObject();
                 String latestVersion = json.get("version").getAsString();
                 String downloadUrl1 = json.get("downloadUrl1").getAsString();
-
+*/
                 // Ottieni la versione attuale (del proxy o del plugin, a seconda di ciò che ti serve)
-                String currentVersion = "7.1.4";
-
+                String currentVersion = "7.1.5";
+                String latestVersion =  "7.1.5";
+                String downloadUrl1 = "https://www.spigotmc.org/resources/%E2%AD%90-reportdiscordplus-%E2%AD%90.111055/";
                 // Se la versione è diversa, notifica gli admin
                 if (!currentVersion.equals(latestVersion)) {
                     // Prepara i placeholder
