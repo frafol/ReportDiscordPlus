@@ -6,7 +6,7 @@
   "authors": [
     "Francies"
   ],
-  "main": "velocity.dev.francies.ReportDiscordPlus.ReportDiscordPlus",
+  "main": "velocity.me.francies.ReportDiscordPlus.ReportDiscordPlus",
   "dependencies": [],
   "commands": {
     "report": {
